@@ -105,24 +105,35 @@ export const PageSEOSection = ({ pageIdentifier, defaultTitle = '', defaultDesc 
             document.head.appendChild(scriptEl);
           }
 
-          const schemaObject = {
-            "@context": "https://schema.org",
-            "@type": data.schema_type || "Church",
-            "name": "Compassionate Love of Calvary Ministries",
-            "headline": pageTitle,
-            "description": pageDescription,
-            "url": canonicalUrl,
-            "logo": "https://www.clm.org.in/logo.png",
-            "image": getMediaUrl(ogImg),
-            "address": {
-              "@type": "PostalAddress",
-              "streetAddress": "81/5, 6th Street, Shanthi Nagar",
-              "addressLocality": "Chengalpattu",
-              "addressRegion": "Tamil Nadu",
-              "postalCode": "603003",
-              "addressCountry": "IN"
-            }
-          };
+          let schemaObject;
+          try {
+            schemaObject = data.schema_json
+              ? typeof data.schema_json === 'string' ? JSON.parse(data.schema_json) : data.schema_json
+              : null;
+          } catch (err) {
+            console.error(`Invalid Schema.org JSON-LD for ${pageIdentifier}:`, err);
+          }
+
+          schemaObject = schemaObject && typeof schemaObject === 'object' && !Array.isArray(schemaObject)
+            ? schemaObject
+            : {
+              "@context": "https://schema.org",
+              "@type": data.schema_type || "Church",
+              "name": "Compassionate Love of Calvary Ministries",
+              "headline": pageTitle,
+              "description": pageDescription,
+              "url": canonicalUrl,
+              "logo": "https://www.clm.org.in/logo.png",
+              "image": getMediaUrl(ogImg),
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "81/5, 6th Street, Shanthi Nagar",
+                "addressLocality": "Chengalpattu",
+                "addressRegion": "Tamil Nadu",
+                "postalCode": "603003",
+                "addressCountry": "IN"
+              }
+            };
 
           scriptEl.textContent = JSON.stringify(schemaObject);
         }
@@ -134,9 +145,23 @@ export const PageSEOSection = ({ pageIdentifier, defaultTitle = '', defaultDesc 
     };
 
     fetchSEO();
+    const handlePublishedSEO = (event) => {
+      if (event.detail?.pageIdentifier === pageIdentifier) fetchSEO();
+    };
+    const seoChannel = typeof BroadcastChannel !== 'undefined'
+      ? new BroadcastChannel('clm-seo-published')
+      : null;
+    const handleBroadcastSEO = (event) => {
+      if (event.data?.pageIdentifier === pageIdentifier) fetchSEO();
+    };
+    window.addEventListener('seo:published', handlePublishedSEO);
+    seoChannel?.addEventListener('message', handleBroadcastSEO);
 
     return () => {
       isMounted = false;
+      window.removeEventListener('seo:published', handlePublishedSEO);
+      seoChannel?.removeEventListener('message', handleBroadcastSEO);
+      seoChannel?.close();
       const scriptEl = document.getElementById(`clm-schema-${pageIdentifier}`);
       if (scriptEl) scriptEl.remove();
     };

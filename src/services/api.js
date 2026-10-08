@@ -114,7 +114,9 @@ export const api = {
   },
 
   async getPageSEO(pageIdentifier) {
-    const res = await fetch(`${API_BASE_URL}/seo/${encodeURIComponent(pageIdentifier)}/`);
+    const res = await fetch(`${API_BASE_URL}/seo/${encodeURIComponent(pageIdentifier)}/`, {
+      cache: 'no-store',
+    });
     if (!res.ok) throw new Error('Failed to fetch page SEO');
     return res.json();
   },
@@ -782,4 +784,3 @@ export const api = {
     return true;
   },
 };
-

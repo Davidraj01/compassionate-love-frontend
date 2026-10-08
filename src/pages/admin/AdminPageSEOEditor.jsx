@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { api, getMediaUrl } from '../../services/api';
 import { ROUTES } from '../../routes/routes';
 import { MediaPickerModal } from '../../components/MediaPickerModal';
+import SEOManagementPanel from '../../components/SEOManagementPanel';
 import { 
   Globe, Search, Save, Eye, CheckCircle2, AlertCircle, Sparkles, 
   Smartphone, Monitor, ExternalLink, ShieldCheck, Tag, Link2, Share2, 
@@ -368,6 +369,8 @@ export const AdminPageSEOEditor = () => {
           </button>
         </div>
       </div>
+
+      <SEOManagementPanel key={selectedPage} page={currentPageObj} />
 
       {/* Blue Banner: Page Sections (new structure) */}
       <div style={{
