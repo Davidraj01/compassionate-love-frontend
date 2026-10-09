@@ -20,7 +20,7 @@ export const ROUTES = {
   CONTACT: '/contact',
 
   // Authentication Route (Hidden from public navigation)
-  ADMIN_LOGIN: 'adminLogin',
+  ADMIN_LOGIN: '/adminLogin',
 
   // Protected Admin Routes (Hidden & Guarded - accessible only after login)
   ADMIN_DASHBOARD: '/admin',
