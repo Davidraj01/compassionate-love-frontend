@@ -3,7 +3,7 @@
  * Communicates with Django backend endpoints.
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.loveofcalvary.org/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.loveofcalvary.org/api/';
 
 /**
  * Helper to ensure media URLs (images, videos, thumbnails) load correctly
