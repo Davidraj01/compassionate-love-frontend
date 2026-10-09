@@ -27,6 +27,16 @@ const PAGES = [
   { id: 'contact', name: 'Contact Page', path: ROUTES.CONTACT, defaultKw: 'prayer request pastor contact chengalpattu' },
 ];
 
+const slugify = (value) => value
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase()
+  .trim()
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-+|-+$/g, '');
+
+const isInternalPath = (value) => /^\/(?!\/)[A-Za-z0-9/_#?&=.%+-]*$/.test(value);
+
 const DEFAULT_SECTIONS = {
   hero: {
     h1: 'Sharing the Love of Christ, Bringing Hope to Every Heart',
@@ -95,6 +105,10 @@ export const AdminPageSEOEditor = () => {
     isPublished: true,
     template: 'Default Landing Page',
   });
+  const [internalLinkUrl, setInternalLinkUrl] = useState('/#key-features');
+  const [pageStatuses, setPageStatuses] = useState(() => Object.fromEntries(
+    PAGES.map((page) => [page.id, { status: 'loading', busy: false }])
+  ));
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -150,26 +164,23 @@ export const AdminPageSEOEditor = () => {
           robots_follow: data.robots_follow ?? true,
         });
 
-        if (data.sections_data && Object.keys(data.sections_data).length > 0) {
-          setSections(prev => ({
-            ...prev,
-            ...data.sections_data
-          }));
-        } else if (data.h1_heading) {
-          setSections(prev => ({
-            ...prev,
-            hero: {
-              ...prev.hero,
-              h1: data.h1_heading || prev.hero.h1,
-            }
-          }));
+        const mergedSections = Object.entries(DEFAULT_SECTIONS).reduce((result, [key, defaults]) => {
+          const savedSection = data.sections_data?.[key];
+          result[key] = defaults && typeof defaults === 'object' && !Array.isArray(defaults)
+            ? { ...defaults, ...(savedSection && typeof savedSection === 'object' ? savedSection : {}) }
+            : savedSection ?? defaults;
+          return result;
+        }, {});
+        if (data.h1_heading) {
+          mergedSections.hero = { ...mergedSections.hero, h1: data.h1_heading };
         }
+        setSections(mergedSections);
 
         setPageSettings({
           internalTitle: `${PAGES.find(p => p.id === pageId)?.name || pageId} Landing Structure`,
-          slug: pageId === 'home' ? '' : pageId,
+          slug: data.slug || (pageId === 'home' ? '' : pageId),
           targetLocation: 'Chengalpattu, Tamil Nadu, India',
-          isPublished: true,
+          isPublished: data.is_published ?? true,
           template: 'Default Landing Page',
         });
       }
@@ -183,6 +194,81 @@ export const AdminPageSEOEditor = () => {
   useEffect(() => {
     fetchPageSEO(selectedPage);
   }, [selectedPage]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    Promise.allSettled(PAGES.map(async (page) => ({
+      id: page.id,
+      data: await api.getAdminPageSEO(page.id),
+    }))).then((results) => {
+      if (!isMounted) return;
+      setPageStatuses((current) => {
+        const next = { ...current };
+        results.forEach((result, index) => {
+          const page = PAGES[index];
+          if (result.status === 'fulfilled') {
+            next[page.id] = {
+              status: result.value.data?.is_published === false ? 'draft' : 'published',
+              busy: false,
+            };
+          } else {
+            console.error(`Failed to load publish status for ${page.id}:`, result.reason);
+            next[page.id] = { status: 'error', busy: false };
+          }
+        });
+        return next;
+      });
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const togglePagePublished = async (page) => {
+    const currentStatus = pageStatuses[page.id]?.status;
+    if (currentStatus !== 'published' && currentStatus !== 'draft') return;
+
+    const nextIsPublished = currentStatus !== 'published';
+    setPageStatuses((current) => ({
+      ...current,
+      [page.id]: { ...current[page.id], busy: true },
+    }));
+    try {
+      const existingData = await api.getAdminPageSEO(page.id);
+      const result = await api.updateAdminPageSEO(page.id, {
+        ...existingData,
+        page_identifier: page.id,
+        is_published: nextIsPublished,
+      });
+      const isPublished = result?.is_published ?? nextIsPublished;
+      setPageStatuses((current) => ({
+        ...current,
+        [page.id]: { status: isPublished ? 'published' : 'draft', busy: false },
+      }));
+      if (selectedPage === page.id) {
+        setPageSettings((current) => ({ ...current, isPublished }));
+      }
+      const publishEvent = { pageIdentifier: page.id };
+      window.dispatchEvent(new CustomEvent('seo:published', { detail: publishEvent }));
+      if (typeof BroadcastChannel !== 'undefined') {
+        const channel = new BroadcastChannel('clm-seo-published');
+        channel.postMessage(publishEvent);
+        channel.close();
+      }
+    } catch (error) {
+      console.error(`Failed to ${nextIsPublished ? 'publish' : 'unpublish'} ${page.id}:`, error);
+      setPageStatuses((current) => ({
+        ...current,
+        [page.id]: { ...current[page.id], busy: false },
+      }));
+      setFeedback({
+        type: 'error',
+        text: `Could not ${nextIsPublished ? 'publish' : 'move to draft'} ${page.name}. Please try again.`,
+      });
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -205,10 +291,38 @@ export const AdminPageSEOEditor = () => {
         robots_index: seoData.robots_index,
         robots_follow: seoData.robots_follow,
         sections_data: sections,
+        slug: pageSettings.slug,
+        is_published: pageSettings.isPublished,
       };
 
-      await api.updateAdminPageSEO(selectedPage, payload);
-      setFeedback({ type: 'success', text: 'All 8 Page Sections & SEO Settings saved and deployed successfully!' });
+      const result = await api.updateAdminPageSEO(selectedPage, payload);
+      if (result && typeof result === 'object') {
+        setPageSettings(prev => ({
+          ...prev,
+          slug: result.slug ?? prev.slug,
+          isPublished: result.is_published ?? prev.isPublished,
+        }));
+      }
+      setPageStatuses((current) => ({
+        ...current,
+        [selectedPage]: {
+          status: (result?.is_published ?? pageSettings.isPublished) ? 'published' : 'draft',
+          busy: false,
+        },
+      }));
+      setFeedback({
+        type: 'success',
+        text: pageSettings.isPublished
+          ? 'Page sections and SEO settings saved and published.'
+          : 'Page sections and SEO settings saved as a draft.',
+      });
+      const publishEvent = { pageIdentifier: selectedPage };
+      window.dispatchEvent(new CustomEvent('seo:published', { detail: publishEvent }));
+      if (typeof BroadcastChannel !== 'undefined') {
+        const channel = new BroadcastChannel('clm-seo-published');
+        channel.postMessage(publishEvent);
+        channel.close();
+      }
       setTimeout(() => setFeedback({ type: '', text: '' }), 4500);
     } catch (err) {
       setFeedback({ type: 'error', text: 'Failed to save SEO Page structure. Please check server connection.' });
@@ -217,10 +331,15 @@ export const AdminPageSEOEditor = () => {
     }
   };
 
-  // Helper to insert quick formatting into textarea
-  const insertFormatting = (targetKey, subKey, startTag, endTag = '') => {
+  // Insert formatting around selected text, or add a short editable placeholder.
+  const insertFormatting = (targetKey, subKey, startTag, endTag = '', placeholder = 'Text') => {
     const currentValue = sections[targetKey][subKey] || '';
-    const updated = `${currentValue}\n${startTag}Sample Content${endTag}`;
+    const textarea = document.getElementById(`page-content-${targetKey}`);
+    const start = textarea?.selectionStart ?? currentValue.length;
+    const end = textarea?.selectionEnd ?? currentValue.length;
+    const selected = currentValue.substring(start, end) || placeholder;
+    const replacement = `${startTag}${selected}${endTag}`;
+    const updated = currentValue.substring(0, start) + replacement + currentValue.substring(end);
     setSections(prev => ({
       ...prev,
       [targetKey]: {
@@ -228,7 +347,47 @@ export const AdminPageSEOEditor = () => {
         [subKey]: updated
       }
     }));
+    window.setTimeout(() => {
+      if (!textarea) return;
+      textarea.focus();
+      textarea.setSelectionRange(start + startTag.length, start + startTag.length + selected.length);
+    }, 0);
   };
+
+  const renderContentToolbar = (targetKey) => (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.35rem',
+      padding: '0.4rem 0.6rem',
+      background: '#0B132B',
+      border: '1px solid #1E2E4E',
+      borderBottom: 'none',
+      borderRadius: '8px 8px 0 0',
+      flexWrap: 'wrap'
+    }}>
+      <button type="button" onClick={() => insertFormatting(targetKey, 'content', '<strong>', '</strong>')} style={{ background: 'transparent', border: 'none', color: '#CBD5E1', cursor: 'pointer', padding: '0.2rem 0.4rem', fontWeight: 800 }} title="Bold">
+        <Bold size={14} />
+      </button>
+      <input
+        type="text"
+        aria-label="Internal link URL"
+        value={internalLinkUrl}
+        onChange={(event) => setInternalLinkUrl(event.target.value)}
+        placeholder="/#key-features"
+        style={{ minWidth: '150px', flex: '1 1 180px', padding: '0.3rem 0.5rem', background: '#111C33', border: '1px solid #334155', borderRadius: '5px', color: '#E2E8F0', fontSize: '0.78rem' }}
+      />
+      <button
+        type="button"
+        onClick={() => insertFormatting(targetKey, 'content', `<a href="${internalLinkUrl}">`, '</a>', 'Key Features')}
+        disabled={!isInternalPath(internalLinkUrl.trim())}
+        style={{ background: 'transparent', border: 'none', color: '#CBD5E1', cursor: 'pointer', padding: '0.2rem 0.4rem', opacity: isInternalPath(internalLinkUrl.trim()) ? 1 : 0.5 }}
+        title="Insert internal link"
+      >
+        <LinkIcon size={14} />
+      </button>
+    </div>
+  );
 
   const currentPageObj = PAGES.find(p => p.id === selectedPage) || PAGES[0];
 
@@ -365,10 +524,63 @@ export const AdminPageSEOEditor = () => {
               boxShadow: '0 4px 14px rgba(37, 99, 235, 0.4)'
             }}
           >
-            <Save size={16} /> {saving ? 'Saving Changes...' : 'Save & Publish'}
+            <Save size={16} /> {saving ? 'Saving Changes...' : 'Save Page Changes'}
           </button>
         </div>
       </div>
+
+      <section className="admin-seo-page-list" aria-label="Manage individual page publishing">
+        <div className="admin-seo-page-list-heading">
+          <div>
+            <h2>Manage Pages</h2>
+            <p>Edit and publish each page independently.</p>
+          </div>
+        </div>
+        <div className="admin-seo-page-grid">
+          {PAGES.map((page) => {
+            const pageStatus = pageStatuses[page.id] || { status: 'loading', busy: false };
+            const isPublished = pageStatus.status === 'published';
+            const statusLabel = pageStatus.status === 'loading'
+              ? 'Loading status'
+              : pageStatus.status === 'error'
+                ? 'Status unavailable'
+                : isPublished ? 'Published' : 'Draft';
+            return (
+              <article className="admin-seo-page-card" key={page.id}>
+                <div className="admin-seo-page-card-info">
+                  <strong>{page.name}</strong>
+                  <span>{page.path}</span>
+                  <span className={`admin-seo-page-status ${isPublished ? 'is-published' : ''} ${pageStatus.status === 'error' ? 'has-error' : ''}`}>
+                    <span aria-hidden="true" />
+                    {statusLabel}
+                  </span>
+                </div>
+                <div className="admin-seo-page-actions">
+                  <button
+                    type="button"
+                    className="admin-seo-page-edit"
+                    onClick={() => {
+                      setSelectedPage(page.id);
+                      sectionRefs['section-1'].current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}
+                  >
+                    <FileText size={15} /> Edit
+                  </button>
+                  <button
+                    type="button"
+                    className={`admin-seo-page-publish ${isPublished ? 'is-published' : ''}`}
+                    onClick={() => togglePagePublished(page)}
+                    disabled={pageStatus.busy || (pageStatus.status !== 'published' && pageStatus.status !== 'draft')}
+                  >
+                    {pageStatus.busy ? <RefreshCw size={15} className="seo-spin" /> : <Check size={15} />}
+                    {pageStatus.busy ? 'Saving…' : isPublished ? 'Unpublish' : 'Publish'}
+                  </button>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
 
       <SEOManagementPanel key={selectedPage} page={currentPageObj} />
 
@@ -650,12 +862,21 @@ export const AdminPageSEOEditor = () => {
                   <button type="button" onClick={() => insertFormatting('section2_content_image', 'content', '<blockquote>', '</blockquote>')} style={{ background: 'transparent', border: 'none', color: '#94A3B8', cursor: 'pointer', padding: '0.2rem' }} title="Quote">
                     <Quote size={14} />
                   </button>
-                  <button type="button" onClick={() => insertFormatting('section2_content_image', 'content', '<a href="#">', '</a>')} style={{ background: 'transparent', border: 'none', color: '#94A3B8', cursor: 'pointer', padding: '0.2rem' }} title="Link">
+                  <button type="button" onClick={() => insertFormatting('section2_content_image', 'content', `<a href="${internalLinkUrl}">`, '</a>', 'Key Features')} disabled={!isInternalPath(internalLinkUrl.trim())} style={{ background: 'transparent', border: 'none', color: '#94A3B8', cursor: 'pointer', padding: '0.2rem', opacity: isInternalPath(internalLinkUrl.trim()) ? 1 : 0.5 }} title="Internal link">
                     <LinkIcon size={14} />
                   </button>
+                  <input
+                    type="text"
+                    aria-label="Internal link URL"
+                    value={internalLinkUrl}
+                    onChange={(e) => setInternalLinkUrl(e.target.value)}
+                    placeholder="/#key-features"
+                    style={{ width: '130px', padding: '0.25rem 0.4rem', background: '#111C33', border: '1px solid #334155', borderRadius: '5px', color: '#E2E8F0', fontSize: '0.72rem' }}
+                  />
                 </div>
 
                 <textarea
+                  id="page-content-section2_content_image"
                   rows="7"
                   value={sections.section2_content_image.content}
                   onChange={(e) => setSections(prev => ({ ...prev, section2_content_image: { ...prev.section2_content_image, content: e.target.value } }))}
@@ -785,7 +1006,9 @@ export const AdminPageSEOEditor = () => {
                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>
                   CONTENT
                 </label>
+                {renderContentToolbar('section3_content_block')}
                 <textarea
+                  id="page-content-section3_content_block"
                   rows="6"
                   value={sections.section3_content_block.content}
                   onChange={(e) => setSections(prev => ({ ...prev, section3_content_block: { ...prev.section3_content_block, content: e.target.value } }))}
@@ -794,7 +1017,7 @@ export const AdminPageSEOEditor = () => {
                     padding: '0.85rem 1rem',
                     background: '#0B132B',
                     border: '1px solid #1E2E4E',
-                    borderRadius: '8px',
+                    borderRadius: '0 0 8px 8px',
                     color: '#E2E8F0',
                     fontSize: '0.88rem',
                     lineHeight: 1.6,
@@ -857,7 +1080,9 @@ export const AdminPageSEOEditor = () => {
                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>
                   CONTENT
                 </label>
+                {renderContentToolbar('section4_content_block')}
                 <textarea
+                  id="page-content-section4_content_block"
                   rows="6"
                   value={sections.section4_content_block.content}
                   onChange={(e) => setSections(prev => ({ ...prev, section4_content_block: { ...prev.section4_content_block, content: e.target.value } }))}
@@ -866,7 +1091,7 @@ export const AdminPageSEOEditor = () => {
                     padding: '0.85rem 1rem',
                     background: '#0B132B',
                     border: '1px solid #1E2E4E',
-                    borderRadius: '8px',
+                    borderRadius: '0 0 8px 8px',
                     color: '#E2E8F0',
                     fontSize: '0.88rem',
                     lineHeight: 1.6,
@@ -929,7 +1154,9 @@ export const AdminPageSEOEditor = () => {
                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>
                   CONTENT
                 </label>
+                {renderContentToolbar('section5_content_block')}
                 <textarea
+                  id="page-content-section5_content_block"
                   rows="6"
                   value={sections.section5_content_block.content}
                   onChange={(e) => setSections(prev => ({ ...prev, section5_content_block: { ...prev.section5_content_block, content: e.target.value } }))}
@@ -938,7 +1165,7 @@ export const AdminPageSEOEditor = () => {
                     padding: '0.85rem 1rem',
                     background: '#0B132B',
                     border: '1px solid #1E2E4E',
-                    borderRadius: '8px',
+                    borderRadius: '0 0 8px 8px',
                     color: '#E2E8F0',
                     fontSize: '0.88rem',
                     lineHeight: 1.6,
@@ -1241,11 +1468,11 @@ export const AdminPageSEOEditor = () => {
                 <input
                   type="text"
                   value={pageSettings.slug}
-                  onChange={(e) => setPageSettings(prev => ({ ...prev, slug: e.target.value }))}
+                  onChange={(e) => setPageSettings(prev => ({ ...prev, slug: slugify(e.target.value) }))}
                   style={{ width: '100%', padding: '0.55rem 0.75rem', background: '#0B132B', border: '1px solid #1E2E4E', borderRadius: '6px', color: '#FFFFFF', fontSize: '0.82rem', fontFamily: 'monospace' }}
                 />
                 <span style={{ fontSize: '0.68rem', color: '#64748B', marginTop: '0.2rem', display: 'block' }}>
-                  Page URL: loveofcalvary.org/{pageSettings.slug || ''}
+                  Page URL: {new URL(pageSettings.slug ? `/${pageSettings.slug}` : currentPageObj.path, window.location.origin).toString()}
                 </span>
               </div>
 
@@ -1271,6 +1498,7 @@ export const AdminPageSEOEditor = () => {
                     {pageSettings.isPublished ? 'Published & Live' : 'Draft'}
                   </span>
                 </div>
+                <span style={{ fontSize: '0.68rem', color: '#64748B' }}>Manage this page’s publish status in the Manage Pages list.</span>
               </div>
 
               <div>

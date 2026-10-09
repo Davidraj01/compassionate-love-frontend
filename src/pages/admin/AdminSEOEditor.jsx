@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { api, getMediaUrl } from '../../services/api';
 import { ROUTES } from '../../routes/routes';
+import { convertWordPressToHtml } from '../../utils/wpToHtmlConverter';
 import { 
   Globe, Search, Plus, Edit2, Trash2, Eye, 
   CheckCircle2, AlertCircle, Loader2, Sparkles, 
   ExternalLink, Share2, Tag, Calendar, User, 
   Check, X, FileText, BarChart2, ShieldCheck, 
   Image as ImageIcon, RefreshCw, Smartphone, Monitor,
-  Sliders, Link as LinkIcon, HelpCircle, ArrowRight
+  Sliders, Link as LinkIcon, HelpCircle, ArrowRight,
+  Bold, Italic, Underline, Strikethrough, List, ListOrdered, Quote, Minus
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -32,6 +34,8 @@ export const AdminSEOEditor = () => {
   const [editingId, setEditingId] = useState(null);
   const [activeEditorTab, setActiveEditorTab] = useState('content'); // 'content', 'seo', 'preview'
   const [serpDevice, setSerpDevice] = useState('desktop'); // 'desktop', 'mobile'
+  const [internalLinkUrl, setInternalLinkUrl] = useState('/#key-features');
+  const [contentColor, setContentColor] = useState('#0f172a');
   
   // Delete Modal State
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
@@ -105,8 +109,8 @@ export const AdminSEOEditor = () => {
       const currentGeneratedSlug = slugify(prev.title);
       const newSlug = slugify(val);
       
-      // Auto-generate slug if new post or if current slug matched auto-generated slug
-      if (!editingId && (!prev.slug || prev.slug === currentGeneratedSlug)) {
+      // Keep generated URLs in sync while editing, but preserve custom slugs.
+      if (!prev.slug || prev.slug === currentGeneratedSlug) {
         updated.slug = newSlug;
         // Auto-generate canonical SEO URL
         if (!prev.canonical_url || prev.canonical_url === `https://www.loveofcalvary.org/blog/${prev.slug}`) {
@@ -237,13 +241,13 @@ export const AdminSEOEditor = () => {
   };
 
   // Quick insert markdown helper into content textarea
-  const insertFormatting = (syntaxStart, syntaxEnd = '') => {
+  const insertFormatting = (syntaxStart, syntaxEnd = '', placeholder = 'Sample text') => {
     const textarea = document.getElementById('blog-content-textarea');
     if (!textarea) return;
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const currentText = formData.content;
-    const selected = currentText.substring(start, end) || 'Sample text';
+    const selected = currentText.substring(start, end) || placeholder;
     const replacement = `${syntaxStart}${selected}${syntaxEnd}`;
     const newContent = currentText.substring(0, start) + replacement + currentText.substring(end);
     setFormData(prev => ({ ...prev, content: newContent }));
@@ -251,6 +255,30 @@ export const AdminSEOEditor = () => {
       textarea.focus();
       textarea.setSelectionRange(start + syntaxStart.length, start + syntaxStart.length + selected.length);
     }, 50);
+  };
+
+  const insertHorizontalRule = () => {
+    const textarea = document.getElementById('blog-content-textarea');
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const content = formData.content;
+    const replacement = '\n\n---\n\n';
+    const nextContent = content.substring(0, start) + replacement + content.substring(end);
+    setFormData((prev) => ({ ...prev, content: nextContent }));
+    window.setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + replacement.length, start + replacement.length);
+    }, 50);
+  };
+
+  const insertInternalLink = () => {
+    const target = internalLinkUrl.trim();
+    if (!/^\/(?!\/)[A-Za-z0-9/_#?&=.%+-]*$/.test(target)) {
+      showToast('error', 'Enter a valid internal path, such as /about or /#key-features.');
+      return;
+    }
+    insertFormatting('[', `](${target})`, 'Key Features');
   };
 
   // Real-time SEO Scoring & Checklist Engine
@@ -1093,8 +1121,9 @@ export const AdminSEOEditor = () => {
                     </div>
 
                     {/* Quick Formatting Toolbar */}
-                    <div style={{
+                    <div className="blog-content-toolbar" style={{
                       display: 'flex',
+                      alignItems: 'center',
                       gap: '0.35rem',
                       background: '#F1F5F9',
                       padding: '0.4rem 0.6rem',
@@ -1103,26 +1132,57 @@ export const AdminSEOEditor = () => {
                       borderBottom: 'none',
                       flexWrap: 'wrap'
                     }}>
-                      <button type="button" onClick={() => insertFormatting('### ')} style={{ padding: '0.25rem 0.5rem', fontSize: '0.78rem', fontWeight: 700, borderRadius: '4px', border: '1px solid #CBD5E1', background: '#FFFFFF', cursor: 'pointer' }}>
+                      <button type="button" aria-label="Insert heading 2" onClick={() => insertFormatting('### ')} style={{ padding: '0.25rem 0.5rem', fontSize: '0.78rem', fontWeight: 700, borderRadius: '4px', border: '1px solid #CBD5E1', background: '#FFFFFF', cursor: 'pointer' }}>
                         H2
                       </button>
-                      <button type="button" onClick={() => insertFormatting('#### ')} style={{ padding: '0.25rem 0.5rem', fontSize: '0.78rem', fontWeight: 700, borderRadius: '4px', border: '1px solid #CBD5E1', background: '#FFFFFF', cursor: 'pointer' }}>
+                      <button type="button" aria-label="Insert heading 3" onClick={() => insertFormatting('#### ')} style={{ padding: '0.25rem 0.5rem', fontSize: '0.78rem', fontWeight: 700, borderRadius: '4px', border: '1px solid #CBD5E1', background: '#FFFFFF', cursor: 'pointer' }}>
                         H3
                       </button>
-                      <button type="button" onClick={() => insertFormatting('**', '**')} style={{ padding: '0.25rem 0.5rem', fontSize: '0.78rem', fontWeight: 700, borderRadius: '4px', border: '1px solid #CBD5E1', background: '#FFFFFF', cursor: 'pointer' }}>
-                        Bold
+                      <button type="button" aria-label="Bold" onClick={() => insertFormatting('**', '**')} style={{ padding: '0.25rem 0.5rem', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#FFFFFF', cursor: 'pointer' }}>
+                        <Bold size={14} />
                       </button>
-                      <button type="button" onClick={() => insertFormatting('*', '*')} style={{ padding: '0.25rem 0.5rem', fontSize: '0.78rem', fontStyle: 'italic', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#FFFFFF', cursor: 'pointer' }}>
-                        Italic
+                      <button type="button" aria-label="Italic" onClick={() => insertFormatting('*', '*')} style={{ padding: '0.25rem 0.5rem', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#FFFFFF', cursor: 'pointer' }}>
+                        <Italic size={14} />
                       </button>
-                      <button type="button" onClick={() => insertFormatting('> ')} style={{ padding: '0.25rem 0.5rem', fontSize: '0.78rem', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#FFFFFF', cursor: 'pointer' }}>
-                        Quote / Scripture
+                      <button type="button" aria-label="Underline" onClick={() => insertFormatting('<u>', '</u>')} style={{ padding: '0.25rem 0.5rem', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#FFFFFF', cursor: 'pointer' }}>
+                        <Underline size={14} />
                       </button>
-                      <button type="button" onClick={() => insertFormatting('- ')} style={{ padding: '0.25rem 0.5rem', fontSize: '0.78rem', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#FFFFFF', cursor: 'pointer' }}>
-                        Bullet List
+                      <button type="button" aria-label="Strikethrough" onClick={() => insertFormatting('<s>', '</s>')} style={{ padding: '0.25rem 0.5rem', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#FFFFFF', cursor: 'pointer' }}>
+                        <Strikethrough size={14} />
                       </button>
-                      <button type="button" onClick={() => insertFormatting('1. ')} style={{ padding: '0.25rem 0.5rem', fontSize: '0.78rem', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#FFFFFF', cursor: 'pointer' }}>
-                        Numbered List
+                      <input
+                        type="color"
+                        aria-label="Text color"
+                        value={contentColor}
+                        onChange={(e) => setContentColor(e.target.value)}
+                        style={{ width: '34px', height: '32px', padding: '3px', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#FFFFFF', cursor: 'pointer' }}
+                      />
+                      <button type="button" aria-label="Apply text color" onClick={() => insertFormatting(`<span style="color: ${contentColor}">`, '</span>')} style={{ padding: '0.25rem 0.5rem', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#FFFFFF', cursor: 'pointer', color: contentColor, fontWeight: 800 }}>
+                        A
+                      </button>
+                      <button type="button" aria-label="Quote or scripture" onClick={() => insertFormatting('> ')} style={{ padding: '0.25rem 0.5rem', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#FFFFFF', cursor: 'pointer' }}>
+                        <Quote size={14} />
+                      </button>
+                      <button type="button" aria-label="Bullet list" onClick={() => insertFormatting('- ')} style={{ padding: '0.25rem 0.5rem', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#FFFFFF', cursor: 'pointer' }}>
+                        <List size={14} />
+                      </button>
+                      <button type="button" aria-label="Numbered list" onClick={() => insertFormatting('1. ')} style={{ padding: '0.25rem 0.5rem', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#FFFFFF', cursor: 'pointer' }}>
+                        <ListOrdered size={14} />
+                      </button>
+                      <button type="button" aria-label="Insert horizontal divider" onClick={insertHorizontalRule} style={{ padding: '0.25rem 0.5rem', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#FFFFFF', cursor: 'pointer' }}>
+                        <Minus size={14} />
+                      </button>
+                      <input
+                        type="text"
+                        aria-label="Internal link URL"
+                        value={internalLinkUrl}
+                        onChange={(e) => setInternalLinkUrl(e.target.value)}
+                        placeholder="/#key-features"
+                        style={{ minWidth: '150px', flex: '1 1 180px', padding: '0.25rem 0.5rem', fontSize: '0.78rem', borderRadius: '4px', border: '1px solid #CBD5E1' }}
+                      />
+                      <button type="button" onClick={insertInternalLink} style={{ padding: '0.25rem 0.5rem', fontSize: '0.78rem', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#FFFFFF', cursor: 'pointer' }}>
+                        <LinkIcon size={13} style={{ verticalAlign: 'middle', marginRight: '0.25rem' }} />
+                        Insert internal link
                       </button>
                     </div>
 
@@ -1470,9 +1530,15 @@ export const AdminSEOEditor = () => {
                     </div>
                   )}
 
-                  <div style={{ fontSize: '1rem', lineHeight: 1.8, color: '#1E293B', whiteSpace: 'pre-line' }}>
-                    {formData.content || 'No content written yet.'}
-                  </div>
+                  {formData.content ? (
+                    <div
+                      className="article-body-content"
+                      style={{ fontSize: '1rem', lineHeight: 1.8, color: '#1E293B', overflowWrap: 'anywhere' }}
+                      dangerouslySetInnerHTML={{ __html: convertWordPressToHtml(formData.content) }}
+                    />
+                  ) : (
+                    <div style={{ fontSize: '1rem', lineHeight: 1.8, color: '#64748B' }}>No content written yet.</div>
+                  )}
                 </div>
               )}
 

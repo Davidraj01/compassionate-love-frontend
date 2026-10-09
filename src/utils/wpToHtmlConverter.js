@@ -27,6 +27,7 @@ export const convertWordPressToHtml = (rawInput) => {
   html = html.replace(/^### (.*?)$/gim, '<h3>$1</h3>');
   html = html.replace(/^## (.*?)$/gim, '<h2>$1</h2>');
   html = html.replace(/^# (.*?)$/gim, '<h2>$1</h2>');
+  html = html.replace(/^\s*---+\s*$/gim, '<hr/>');
 
   // Markdown Quotes (> Quote)
   html = html.replace(/^> (.*?)$/gim, '<blockquote style="border-left: 4px solid #D4AF37; padding: 0.75rem 1.25rem; margin: 1.5rem 0; background: #F8FAFC; font-style: italic; color: #1E293B; border-radius: 0 8px 8px 0;">$1</blockquote>');
@@ -46,7 +47,11 @@ export const convertWordPressToHtml = (rawInput) => {
   html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
 
   // Markdown Links [Text](URL)
-  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #0B192C; text-decoration: underline; font-weight: 600;">$1</a>');
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, label, href) => {
+    const isInternalLink = href.startsWith('/') || href.startsWith('#');
+    const targetAttributes = isInternalLink ? '' : ' target="_blank" rel="noopener noreferrer"';
+    return `<a href="${href}"${targetAttributes} style="color: #0B192C; text-decoration: underline; font-weight: 600;">${label}</a>`;
+  });
 
   // 5. Enhance standard Blockquotes with ministry styling if plain
   html = html.replace(/<blockquote>(.*?)<\/blockquote>/gis, (match, inner) => {

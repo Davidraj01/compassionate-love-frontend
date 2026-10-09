@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api, getMediaUrl } from '../services/api';
 import { ROUTES } from '../routes/routes';
+import { convertWordPressToHtml } from '../utils/wpToHtmlConverter';
 import { 
   Globe, Calendar, Clock, User, Share2, 
   ArrowLeft, ArrowRight, BookOpen, Check, 
@@ -284,7 +285,7 @@ export const BlogDetailPage = () => {
           )}
 
           {/* Article Body Content */}
-          {post.content && (post.content.includes('<p>') || post.content.includes('<h2>') || post.content.includes('<h3>') || post.content.includes('<figure>') || post.content.includes('<div>')) ? (
+          {post.content ? (
             <div 
               className="article-body-content" 
               style={{
@@ -292,18 +293,9 @@ export const BlogDetailPage = () => {
                 lineHeight: 1.85,
                 color: '#1E293B'
               }}
-              dangerouslySetInnerHTML={{ __html: post.content }}
+              dangerouslySetInnerHTML={{ __html: convertWordPressToHtml(post.content) }}
             />
-          ) : (
-            <div className="article-body-content" style={{
-              fontSize: '1.05rem',
-              lineHeight: 1.85,
-              color: '#1E293B',
-              whiteSpace: 'pre-line'
-            }}>
-              {post.content}
-            </div>
-          )}
+          ) : null}
 
           {/* Tags */}
           {Array.isArray(post.tags) && post.tags.length > 0 && (

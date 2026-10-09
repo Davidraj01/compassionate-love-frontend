@@ -57,6 +57,7 @@ const SEOManagementPanel = ({ page }) => {
         if (!isMounted) return;
         const initial = {
           ...data,
+          is_published: data.is_published !== false,
           slug: data.slug || page.path.split('/').filter(Boolean).pop() || '',
           canonical_url: data.canonical_url || getPageUrl(page.path, data.slug),
           meta_title: data.meta_title || data.h1_heading || page.name,
@@ -181,6 +182,7 @@ const SEOManagementPanel = ({ page }) => {
         'sections_data',
         'slug',
         'schema_json',
+        'is_published',
       ];
       const payload = savedFields.reduce((fields, key) => {
         const value = Object.hasOwn(updates, key) ? updates[key] : savedData[key];
@@ -214,7 +216,6 @@ const SEOManagementPanel = ({ page }) => {
     meta_description: draft.meta_description,
     focus_keyword: draft.focus_keyword,
   });
-
   const publishSchema = () => {
     if (!schemaValidation.valid) {
       setFeedback({ type: 'error', text: 'Correct the JSON-LD validation errors before publishing.' });

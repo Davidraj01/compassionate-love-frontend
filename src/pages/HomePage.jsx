@@ -186,7 +186,7 @@ export const HomePage = () => {
       </section>
 
       {/* 4. MISSION SECTION (4 Pillars) */}
-      <section className="section section-cream">
+      <section id="key-features" className="section section-cream">
         <div className="container">
           <div className="section-header">
             <span className="section-badge">Core Pillars</span>
@@ -588,4 +588,3 @@ export const HomePage = () => {
     </div>
   );
 };
-

@@ -1,6 +1,7 @@
-import React from 'react';
-import { Routes, Route, Outlet } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Routes, Route, Outlet, useParams } from 'react-router-dom';
 import { ROUTES } from './routes';
+import { api } from '../services/api';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -46,6 +47,62 @@ const PublicLayout = () => (
   </div>
 );
 
+const SEO_PAGE_ROUTES = [
+  { id: 'about', Component: AboutPage },
+  { id: 'ministries', Component: MinistriesPage },
+  { id: 'bible', Component: BiblePage },
+  { id: 'study', Component: StudyPage },
+  { id: 'devotional', Component: DevotionalPage },
+  { id: 'sermons', Component: SermonsPage },
+  { id: 'events', Component: EventsPage },
+  { id: 'blog', Component: BlogPage },
+  { id: 'media', Component: MediaPage },
+  { id: 'contact', Component: ContactPage },
+];
+
+const SEOPageSlugRoute = () => {
+  const { slug } = useParams();
+  const [routeResult, setRouteResult] = useState({ slug: null, status: 'loading', Component: null });
+
+  useEffect(() => {
+    let isMounted = true;
+
+    Promise.allSettled(SEO_PAGE_ROUTES.map(async (page) => ({
+      ...page,
+      seoData: await api.getPageSEO(page.id),
+    }))).then((results) => {
+      if (!isMounted) return;
+      const successfulResults = results
+        .filter((result) => result.status === 'fulfilled')
+        .map((result) => result.value);
+      const match = successfulResults.find((page) => page.seoData?.slug === slug);
+      if (match) {
+        setRouteResult({ slug, status: 'matched', Component: match.Component });
+      } else if (results.some((result) => result.status === 'rejected')) {
+        const failures = results
+          .filter((result) => result.status === 'rejected')
+          .map((result) => result.reason);
+        console.error(`Failed to resolve the public page URL "${slug}".`, failures);
+        setRouteResult({ slug, status: 'error', Component: null });
+      } else {
+        setRouteResult({ slug, status: 'not-found', Component: null });
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [slug]);
+
+  if (routeResult.slug !== slug || routeResult.status === 'loading') {
+    return <div role="status">Loading page…</div>;
+  }
+  if (routeResult.status === 'error') return <div role="alert">Unable to load this page. Please try again later.</div>;
+  if (routeResult.status === 'not-found') return <HomePage />;
+  const PageComponent = routeResult.Component;
+  return <PageComponent />;
+};
+
 export const AppRoutes = () => {
   return (
     <Routes>
@@ -63,6 +120,7 @@ export const AppRoutes = () => {
         <Route path={ROUTES.BLOG_DETAIL} element={<BlogDetailPage />} />
         <Route path={ROUTES.MEDIA} element={<MediaPage />} />
         <Route path={ROUTES.CONTACT} element={<ContactPage />} />
+        <Route path="/:slug" element={<SEOPageSlugRoute />} />
       </Route>
 
       {/* 2. AUTHENTICATION ROUTE (Private standalone page) */}
