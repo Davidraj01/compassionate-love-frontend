@@ -1339,12 +1339,24 @@ export const AdminSEOEditor = () => {
                       maxWidth: serpDevice === 'mobile' ? '420px' : '620px',
                       fontFamily: 'arial, sans-serif'
                     }}>
-                      <div style={{ fontSize: '0.8rem', color: '#202124', display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.25rem' }}>
-                        <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#0B192C', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#D4AF37', fontSize: '0.6rem', fontWeight: 'bold' }}>
-                          C
+                      <div style={{ fontSize: '0.8rem', color: '#202124', display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
+                        <img
+                          src="/logo.png"
+                          alt="Compassionate Love of Calvary Ministries Logo"
+                          style={{
+                            width: '26px',
+                            height: '26px',
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                            background: '#0B192C',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
+                            flexShrink: 0
+                          }}
+                        />
+                        <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.25 }}>
+                          <span style={{ fontSize: '0.82rem', color: '#202124', fontWeight: 600 }}>Compassionate Love of Calvary Ministries</span>
+                          <span style={{ color: '#4d5156', fontSize: '0.74rem' }}>https://www.loveofcalvary.org › blog › {formData.slug || 'article-slug'}</span>
                         </div>
-                        <span style={{ fontSize: '0.78rem', color: '#202124' }}>Compassionate Love of Calvary</span>
-                        <span style={{ color: '#5f6368', fontSize: '0.75rem' }}>https://compassionateloveofcalvary.org › blog › {formData.slug || 'article-slug'}</span>
                       </div>
 
                       <h4 style={{

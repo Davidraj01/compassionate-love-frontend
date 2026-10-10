@@ -88,7 +88,7 @@ export const BlogDetailPage = () => {
           "@type": data.post.schema_type || "BlogPosting",
           "headline": data.post.title,
           "description": pageDesc,
-          "image": pageImg || "https://compassionateloveofcalvary.org/logo.png",
+          "image": pageImg || "https://www.loveofcalvary.org/logo.png",
           "author": {
             "@type": "Person",
             "name": data.post.author || "Pastor David Raj"
@@ -98,7 +98,9 @@ export const BlogDetailPage = () => {
             "name": "Compassionate Love of Calvary Ministries",
             "logo": {
               "@type": "ImageObject",
-              "url": "https://compassionateloveofcalvary.org/logo.png"
+              "url": "https://www.loveofcalvary.org/logo.png",
+              "width": 500,
+              "height": 500
             }
           },
           "datePublished": data.post.published_at || data.post.created_at,

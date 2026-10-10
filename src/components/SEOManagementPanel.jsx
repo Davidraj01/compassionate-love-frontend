@@ -399,7 +399,13 @@ const SEOManagementPanel = ({ page }) => {
             </div>
           )}
           <div className={`seo-google-preview ${device}`}>
-            <div className="seo-preview-url">{draft.canonical_url || currentUrl}</div>
+            <div className="seo-preview-header">
+              <img src="/logo.png" alt="Compassionate Love of Calvary Ministries Logo" className="seo-preview-favicon" />
+              <div className="seo-preview-identity">
+                <span className="seo-preview-sitename">Compassionate Love of Calvary Ministries</span>
+                <span className="seo-preview-url">{draft.canonical_url || currentUrl}</span>
+              </div>
+            </div>
             <div className="seo-preview-title">{draft.meta_title || page.name}</div>
             <div className="seo-preview-description">{draft.meta_description || 'Add a meta description to preview how this page may appear in search results.'}</div>
           </div>

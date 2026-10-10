@@ -305,9 +305,43 @@
 .seo-google-preview.mobile { max-width: 360px; }
 .seo-google-preview.desktop { max-width: 580px; }
 
+.seo-preview-header {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.35rem;
+}
+
+.seo-preview-favicon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #0B192C;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
+.seo-preview-identity {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+  overflow: hidden;
+}
+
+.seo-preview-sitename {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #202124;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .seo-preview-url {
   overflow: hidden;
-  color: #202124;
+  color: #4d5156;
   font-size: .7rem;
   text-overflow: ellipsis;
   white-space: nowrap;
