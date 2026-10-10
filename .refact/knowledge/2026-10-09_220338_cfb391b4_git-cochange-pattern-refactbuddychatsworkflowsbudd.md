@@ -1,6 +1,6 @@
 ---
-id: 566e2860-acc8-4fa7-a655-874ae85876da
-title: 'Git co-change pattern: .refact/buddy/memory_ops.jsonl + .refact/buddy/runtime_queue.jsonl'
+id: 650efce8-50bc-478f-b1c7-066a71f1b509
+title: 'Git co-change pattern: .refact/buddy/chats/workflows/buddy_idle_suggester.json + .refact/buddy/runtime_queue.jsonl'
 tags:
 - cochange
 - git
@@ -8,7 +8,7 @@ tags:
 created: 2026-10-09
 updated: 2026-10-10
 filenames:
-- .refact/buddy/memory_ops.jsonl
+- .refact/buddy/chats/workflows/buddy_idle_suggester.json
 - .refact/buddy/runtime_queue.jsonl
 links: []
 kind: pattern
@@ -17,29 +17,29 @@ superseded_by: null
 deprecated_at: null
 review_after: 2026-10-10
 source_chat_id: null
-created_at: 2026-10-09T15:08:57.963750600+00:00
+created_at: 2026-10-09T16:33:38.548770800+00:00
 summary: null
 description: null
 entities: []
 related_files: []
 related_entities: []
-content_hash: 4893bcc9d36f0b78b353545a465b5a87902026773b9186acdb892338d8821d21
+content_hash: 8bb75a3647b473c189b7723886abb898cca674cfe37151ec25f5cef513554900
 source_tool: buddy_memory_lifecycle:git
 source_confidence: 0.7799999713897705
 source_trajectory_id: null
 source_message_range: null
-source_commit: a67bd2da3064
+source_commit: 801ccdcc856f
 topic: null
 last_used_at: null
 use_count: 0
 last_injected_at: null
 dismissed_count: 0
-source_content_hash: 4893bcc9d36f0b78b353545a465b5a87902026773b9186acdb892338d8821d21
+source_content_hash: 8bb75a3647b473c189b7723886abb898cca674cfe37151ec25f5cef513554900
 review_needed: true
 occurrences: 0
 ---
 
-Git co-change pattern: .refact/buddy/memory_ops.jsonl + .refact/buddy/runtime_queue.jsonl
+Git co-change pattern: .refact/buddy/chats/workflows/buddy_idle_suggester.json + .refact/buddy/runtime_queue.jsonl
 
 These paths changed together 4 times in recent history.
-Commits: a67bd2da3064, 9c3a5ee068c6, 7b141e740496, a8be72ffe761
+Commits: 801ccdcc856f, 7b141e740496, 920c639af98f, a8be72ffe761
