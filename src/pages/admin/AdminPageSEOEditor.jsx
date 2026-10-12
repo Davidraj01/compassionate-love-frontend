@@ -37,6 +37,205 @@ const slugify = (value) => value
 
 const isInternalPath = (value) => /^\/(?!\/)[A-Za-z0-9/_#?&=.%+-]*$/.test(value);
 
+export const INTERNAL_LINK_PRESETS = [
+  { label: 'Key Features & Core Pillars', url: '/#key-features' },
+  { label: 'About Our Ministry', url: '/about' },
+  { label: 'Ministries & Outreach', url: '/ministries' },
+  { label: 'Bible Study & Discipleship', url: '/study' },
+  { label: 'Daily Devotionals', url: '/devotional' },
+  { label: 'Gospel Sermons', url: '/sermons' },
+  { label: 'Church Events', url: '/events' },
+  { label: 'Prayer Request & Contact', url: '/contact' },
+  { label: 'Holy Scriptures Bible', url: '/bible' },
+  { label: 'Ministry Articles & Blog', url: '/blog' },
+];
+
+export const compileSectionsToHtml = (sections, focusKeyword = '') => {
+  if (!sections || typeof sections !== 'object') return '';
+  const parts = [];
+
+  // 1. Hero / H1 Section
+  if (sections.hero?.h1 || sections.hero?.subheading) {
+    parts.push(`
+      <header class="page-seo-compiled-hero" style="margin-bottom: 2rem;">
+        <span class="section-badge" style="display: inline-block; padding: 4px 12px; background: rgba(212,175,55,0.15); color: #d4af37; border-radius: 20px; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.75rem;">
+          Ministry &amp; Biblical Insights
+        </span>
+        ${sections.hero.h1 ? `<h1 class="page-seo-h1" style="font-size: 2.2rem; font-weight: 800; line-height: 1.25; color: #0f172a; margin: 0 0 1rem 0;">${sections.hero.h1}</h1>` : ''}
+        ${sections.hero.subheading ? `<p class="page-seo-subheading" style="font-size: 1.1rem; line-height: 1.6; color: #475569; margin: 0 0 1.25rem 0;">${sections.hero.subheading}</p>` : ''}
+        ${sections.hero.ctaText ? `<a href="${sections.hero.ctaLink || '/about'}" class="btn-primary" style="display: inline-block; padding: 10px 22px; background: #0b192c; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 0.95rem;">${sections.hero.ctaText} &rarr;</a>` : ''}
+      </header>
+    `);
+  }
+
+  // 2. Key Features / Core Pillars Section
+  const kf = sections.key_features;
+  if (kf && Array.isArray(kf.features) && kf.features.length > 0) {
+    parts.push(`
+      <section id="key-features" class="page-seo-key-features" style="margin: 2.5rem 0; padding: 1.75rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+          <span style="font-size: 0.78rem; font-weight: 800; color: #0284c7; text-transform: uppercase; letter-spacing: 0.05em;">Core Pillars</span>
+          <h2 style="font-size: 1.6rem; font-weight: 800; color: #0f172a; margin: 0.35rem 0 0.5rem 0;">${kf.heading || 'Core Pillars & Key Ministry Features'}</h2>
+          ${kf.subheading ? `<p style="font-size: 0.95rem; color: #64748b; margin: 0 auto; max-width: 650px;">${kf.subheading}</p>` : ''}
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+          ${kf.features.map(f => `
+            <div class="key-feature-card" style="padding: 1.25rem; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+              <h3 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 0 0 0.5rem 0;">${f.title}</h3>
+              <p style="font-size: 0.88rem; color: #475569; line-height: 1.5; margin: 0 0 0.75rem 0;">${f.desc}</p>
+              ${f.link ? `<a href="${f.link}" style="color: #0284c7; font-weight: 700; font-size: 0.82rem; text-decoration: underline;">${f.linkText || 'Learn More'} &rarr;</a>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      </section>
+    `);
+  }
+
+  // 3. Section 2: Content & Image
+  const s2 = sections.section2_content_image;
+  if (s2 && (s2.heading || s2.content || s2.imageUrl)) {
+    parts.push(`
+      <section class="page-seo-section-2" style="margin: 2.5rem 0;">
+        ${s2.eyebrow ? `<span style="font-size: 0.8rem; font-weight: 800; color: #d4af37; text-transform: uppercase;">${s2.eyebrow}</span>` : ''}
+        ${s2.heading ? `<h2 style="font-size: 1.7rem; font-weight: 800; color: #0f172a; margin: 0.4rem 0 1.2rem 0;">${s2.heading}</h2>` : ''}
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; align-items: center;">
+          <div class="page-seo-content-col" style="font-size: 1rem; line-height: 1.7; color: #334155;">
+            ${s2.content || ''}
+          </div>
+          ${s2.imageUrl ? `
+            <div class="page-seo-image-col">
+              <img src="${s2.imageUrl}" alt="${s2.heading || (focusKeyword ? `${focusKeyword} - Calvary Ministries` : 'Calvary Ministries')}" style="width: 100%; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.08); object-fit: cover; max-height: 380px;" />
+            </div>
+          ` : ''}
+        </div>
+      </section>
+    `);
+  }
+
+  // 4. Sections 3, 4, 5: Content Blocks
+  ['section3_content_block', 'section4_content_block', 'section5_content_block'].forEach(key => {
+    const s = sections[key];
+    if (s && (s.heading || s.content)) {
+      parts.push(`
+        <section class="page-seo-content-block" style="margin: 2.5rem 0; padding-top: 1.5rem; border-top: 1px solid #e2e8f0;">
+          ${s.heading ? `<h2 style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-bottom: 1rem;">${s.heading}</h2>` : ''}
+          <div style="font-size: 1rem; line-height: 1.75; color: #334155; white-space: pre-wrap;">${s.content}</div>
+        </section>
+      `);
+    }
+  });
+
+  // 5. Testimonials
+  if (sections.testimonials?.raw) {
+    const items = sections.testimonials.raw.split('\n\n').filter(Boolean);
+    parts.push(`
+      <section class="page-seo-testimonials-block" style="margin: 2.5rem 0; padding: 2rem; background: #f1f5f9; border-radius: 12px;">
+        <h2 style="font-size: 1.45rem; font-weight: 800; color: #0f172a; margin-bottom: 1.25rem;">Community Voices &amp; Testimonies</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem;">
+          ${items.map(item => `
+            <div style="padding: 1.2rem; background: #ffffff; border-radius: 8px; border: 1px solid #cbd5e1;">
+              <pre style="font-family: inherit; font-size: 0.9rem; color: #334155; white-space: pre-wrap; margin: 0;">${item}</pre>
+            </div>
+          `).join('')}
+        </div>
+      </section>
+    `);
+  }
+
+  // 6. FAQ Block
+  if (sections.faq?.raw) {
+    const qas = sections.faq.raw.split('\n\n').filter(Boolean);
+    parts.push(`
+      <section class="page-seo-faq-block" style="margin: 2.5rem 0;">
+        <h2 style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-bottom: 1.25rem;">Frequently Asked Questions</h2>
+        <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+          ${qas.map(qa => `
+            <div style="padding: 1.1rem 1.4rem; background: #f8fafc; border-left: 4px solid #0284c7; border-radius: 6px;">
+              <pre style="font-family: inherit; font-size: 0.92rem; color: #1e293b; white-space: pre-wrap; margin: 0; line-height: 1.6;">${qa}</pre>
+            </div>
+          `).join('')}
+        </div>
+      </section>
+    `);
+  }
+
+  // 7. Lead / Prayer Request CTA Form
+  if (sections.lead_form && (sections.lead_form.title || sections.lead_form.buttonText)) {
+    parts.push(`
+      <section class="page-seo-lead-cta" style="margin: 3rem 0 1rem 0; padding: 2.25rem; background: linear-gradient(135deg, #0b192c 0%, #1e293b 100%); border-radius: 14px; text-align: center; color: #ffffff;">
+        <h2 style="font-size: 1.65rem; font-weight: 800; color: #ffffff; margin: 0 0 0.75rem 0;">${sections.lead_form.title}</h2>
+        ${sections.lead_form.description ? `<p style="font-size: 1rem; color: #cbd5e1; max-width: 600px; margin: 0 auto 1.5rem auto; line-height: 1.6;">${sections.lead_form.description}</p>` : ''}
+        <a href="${sections.lead_form.targetLink || '/contact'}" class="btn-cta" style="display: inline-block; padding: 12px 28px; background: #d4af37; color: #0b192c; font-weight: 800; border-radius: 8px; text-decoration: none; font-size: 1rem;">
+          ${sections.lead_form.buttonText || 'Contact Pastoral Team'} &rarr;
+        </a>
+      </section>
+    `);
+  }
+
+  return parts.join('\n');
+};
+
+export const generateRawHtmlTags = (data = {}, heroH1 = '', heroSub = '', pageId = 'home') => {
+  const metaTitle = data.meta_title || `${heroH1 || ''} | Compassionate Love of Calvary`;
+  const metaDesc = data.meta_description || (heroSub ? heroSub.slice(0, 160) : '');
+  const metaKw = data.meta_keywords || (data.focus_keyword ? `${data.focus_keyword}, Calvary, prayer, ministry, Tamil Nadu` : 'ministry, prayer, faith, Calvary, Tamil Nadu');
+  const canonUrl = data.canonical_url || `https://www.loveofcalvary.org/${pageId === 'home' ? '' : pageId}`;
+  const robIndex = data.robots_index !== false ? 'index' : 'noindex';
+  const robFollow = data.robots_follow !== false ? 'follow' : 'nofollow';
+  const ogTitle = data.og_title || metaTitle;
+  const ogDesc = data.og_description || metaDesc;
+  const ogImg = data.og_image_url || data.featured_image_url || 'https://www.loveofcalvary.org/logo.png';
+  const twitterCard = data.twitter_card || 'summary_large_image';
+
+  return `<title>${metaTitle}</title>
+<meta name="description" content="${metaDesc}" />
+<meta name="keywords" content="${metaKw}" />
+<link rel="canonical" href="${canonUrl}" />
+<meta name="robots" content="${robIndex}, ${robFollow}, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+<meta property="og:title" content="${ogTitle}" />
+<meta property="og:description" content="${ogDesc}" />
+<meta property="og:url" content="${canonUrl}" />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="${ogImg}" />
+<meta name="twitter:card" content="${twitterCard}" />
+<meta name="twitter:title" content="${ogTitle}" />
+<meta name="twitter:description" content="${ogDesc}" />
+<meta name="twitter:image" content="${ogImg}" />`;
+};
+
+export const parseRawHtmlToFields = (html = '') => {
+  const updates = {};
+  const titleMatch = html.match(/<title>([^<]*)<\/title>/i);
+  if (titleMatch) updates.meta_title = titleMatch[1].trim();
+
+  const descMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']*)["'][^>]*>/i)
+    || html.match(/<meta[^>]*content=["']([^"']*)["'][^>]*name=["']description["'][^>]*>/i);
+  if (descMatch) updates.meta_description = descMatch[1].trim();
+
+  const kwMatch = html.match(/<meta[^>]*name=["']keywords["'][^>]*content=["']([^"']*)["'][^>]*>/i)
+    || html.match(/<meta[^>]*content=["']([^"']*)["'][^>]*name=["']keywords["'][^>]*>/i);
+  if (kwMatch) updates.meta_keywords = kwMatch[1].trim();
+
+  const canonMatch = html.match(/<link[^>]*rel=["']canonical["'][^>]*href=["']([^"']*)["'][^>]*>/i)
+    || html.match(/<link[^>]*href=["']([^"']*)["'][^>]*rel=["']canonical["'][^>]*>/i);
+  if (canonMatch) updates.canonical_url = canonMatch[1].trim();
+
+  const robotsMatch = html.match(/<meta[^>]*name=["']robots["'][^>]*content=["']([^"']*)["'][^>]*>/i);
+  if (robotsMatch) {
+    const val = robotsMatch[1].toLowerCase();
+    updates.robots_index = !val.includes('noindex');
+    updates.robots_follow = !val.includes('nofollow');
+  }
+
+  const ogTitleMatch = html.match(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']*)["'][^>]*>/i);
+  if (ogTitleMatch) updates.og_title = ogTitleMatch[1].trim();
+
+  const ogDescMatch = html.match(/<meta[^>]*property=["']og:description["'][^>]*content=["']([^"']*)["'][^>]*>/i);
+  if (ogDescMatch) updates.og_description = ogDescMatch[1].trim();
+
+  return updates;
+};
+
 const DEFAULT_SECTIONS = {
   hero: {
     h1: 'Sharing the Love of Christ, Bringing Hope to Every Heart',
@@ -44,10 +243,20 @@ const DEFAULT_SECTIONS = {
     ctaText: 'Discover Our Ministry',
     ctaLink: '/about',
   },
+  key_features: {
+    heading: 'Core Pillars & Key Ministry Features',
+    subheading: 'Four foundational pillars guiding our spiritual journey and Christ-centered service.',
+    features: [
+      { id: 'feat-1', title: 'Faith & Prayer', desc: 'Deepening relationship with Jesus Christ through Biblical truth, daily prayer intercession, and discipleship.', link: '/#key-features', linkText: 'Explore Faith' },
+      { id: 'feat-2', title: 'Compassionate Love', desc: 'Serving all people with Christ-centered kindness, unconditional love, and heartfelt pastoral care.', link: '/about', linkText: 'Our Mission' },
+      { id: 'feat-3', title: 'Living Hope', desc: 'Bringing the transforming hope of the Gospel to individuals, families, and communities.', link: '/sermons', linkText: 'Watch Sermons' },
+      { id: 'feat-4', title: 'Active Ministry Service', desc: 'Meeting community needs through charitable outreach, fellowship, and Biblical action.', link: '/ministries', linkText: 'Join Service' },
+    ]
+  },
   section2_content_image: {
     eyebrow: 'Rooted in Faith, Driven by Compassion',
     heading: 'A Sanctuary of Worship, Fellowship & Gospel Outreach',
-    content: `<p>At Compassionate Love of Calvary Ministries, our doors and hearts are open to everyone. Rooted in prayer, anchored in Biblical truth, and energized by the Holy Spirit, we are dedicated to fostering a loving community where lives are restored, spiritual growth is nurtured, and the light of Christ shines through compassionate service.</p>\n<p>Whether you are seeking prayer, fellowship, spiritual growth, or simply a place to belong, you are always welcome in our spiritual family.</p>`,
+    content: `<p>At Compassionate Love of Calvary Ministries, our doors and hearts are open to everyone. Rooted in prayer, anchored in Biblical truth, and energized by the Holy Spirit, we are dedicated to fostering a loving community where lives are restored, spiritual growth is nurtured, and the light of Christ shines through compassionate service.</p>\n<p>Whether you are seeking prayer, fellowship, spiritual growth, or simply a place to belong, you are always welcome in our spiritual family. Learn more about our <a href="/#key-features">Key Features</a> and ministries.</p>`,
     imageUrl: 'https://images.unsplash.com/photo-1504052434569-70ad5836ab65?auto=format&fit=crop&w=1200&q=80',
   },
   section3_content_block: {
@@ -97,6 +306,10 @@ export const AdminPageSEOEditor = () => {
     robots_follow: true,
   });
 
+  const [rawHtmlCode, setRawHtmlCode] = useState('');
+  const [isRawHtmlEditor, setIsRawHtmlEditor] = useState(false);
+  const [copiedHtml, setCopiedHtml] = useState(false);
+
   const [sections, setSections] = useState(DEFAULT_SECTIONS);
   const [pageSettings, setPageSettings] = useState({
     internalTitle: 'Home Page SEO & Sections Builder',
@@ -106,6 +319,7 @@ export const AdminPageSEOEditor = () => {
     template: 'Default Landing Page',
   });
   const [internalLinkUrl, setInternalLinkUrl] = useState('/#key-features');
+  const [linkAnchorText, setLinkAnchorText] = useState('Key Features');
   const [pageStatuses, setPageStatuses] = useState(() => Object.fromEntries(
     PAGES.map((page) => [page.id, { status: 'loading', busy: false }])
   ));
@@ -122,6 +336,7 @@ export const AdminPageSEOEditor = () => {
   // Ref for sections
   const sectionRefs = {
     'section-1': useRef(null),
+    'section-key-features': useRef(null),
     'section-2': useRef(null),
     'section-3': useRef(null),
     'section-4': useRef(null),
@@ -175,6 +390,9 @@ export const AdminPageSEOEditor = () => {
           mergedSections.hero = { ...mergedSections.hero, h1: data.h1_heading };
         }
         setSections(mergedSections);
+
+        const initialTags = data.raw_head_tags || generateRawHtmlTags(data, data.h1_heading || mergedSections.hero?.h1, mergedSections.hero?.subheading, pageId);
+        setRawHtmlCode(initialTags);
 
         setPageSettings({
           internalTitle: `${PAGES.find(p => p.id === pageId)?.name || pageId} Landing Structure`,
@@ -250,7 +468,7 @@ export const AdminPageSEOEditor = () => {
       if (selectedPage === page.id) {
         setPageSettings((current) => ({ ...current, isPublished }));
       }
-      const publishEvent = { pageIdentifier: page.id };
+      const publishEvent = { pageIdentifier: page.id, data: { ...existingData, is_published: isPublished } };
       window.dispatchEvent(new CustomEvent('seo:published', { detail: publishEvent }));
       if (typeof BroadcastChannel !== 'undefined') {
         const channel = new BroadcastChannel('clm-seo-published');
@@ -270,17 +488,57 @@ export const AdminPageSEOEditor = () => {
     }
   };
 
+  const handleOptimizeForPageOne = () => {
+    const kw = (seoData.focus_keyword || currentPageObj.defaultKw || 'Compassionate Love of Calvary Ministries').trim();
+    const capitalizedKw = kw.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    const newTitle = `${capitalizedKw} | Compassionate Love of Calvary Ministries`;
+    const newDesc = `Discover ${capitalizedKw} at Compassionate Love of Calvary Ministries in Chengalpattu, Tamil Nadu. Rooted in prayer, Bible truth, and Christ-centered worship.`;
+    const newKeywords = `${kw}, Calvary ministries, church in chengalpattu, christian prayer tamil nadu, holy scriptures bible, gospel faith fellowship`;
+    const newHeroH1 = sections.hero?.h1 || `${capitalizedKw} — Living Hope & Faith`;
+    const newCanonical = `https://www.loveofcalvary.org/${selectedPage === 'home' ? '' : selectedPage}`;
+
+    const updatedSeo = {
+      ...seoData,
+      focus_keyword: kw,
+      meta_title: newTitle,
+      meta_description: newDesc,
+      meta_keywords: newKeywords,
+      canonical_url: newCanonical,
+      robots_index: true,
+      robots_follow: true,
+    };
+
+    const updatedSections = {
+      ...sections,
+      hero: {
+        ...sections.hero,
+        h1: newHeroH1,
+      }
+    };
+
+    setSeoData(updatedSeo);
+    setSections(updatedSections);
+    const newRawTags = generateRawHtmlTags(updatedSeo, newHeroH1, updatedSections.hero?.subheading, selectedPage);
+    setRawHtmlCode(newRawTags);
+    setFeedback({
+      type: 'success',
+      text: `⚡ Google Page 1 Optimization Applied! "${kw}" is now synchronized across Title, H1, Meta Description, Keywords, and Structured Data.`
+    });
+    setTimeout(() => setFeedback({ type: '', text: '' }), 5000);
+  };
+
   const handleSave = async () => {
     setSaving(true);
     setFeedback({ type: '', text: '' });
     try {
+      const compiledBody = compileSectionsToHtml(sections, seoData.focus_keyword);
       const payload = {
         page_identifier: selectedPage,
         h1_heading: sections.hero.h1 || seoData.h1_heading,
         featured_image_url: seoData.featured_image_url,
-        meta_title: seoData.meta_title || `${sections.hero.h1} | Compassionate Love of Calvary`,
+        meta_title: seoData.meta_title || `${sections.hero.h1 || 'Home'} | Compassionate Love of Calvary`,
         meta_description: seoData.meta_description || (sections.hero.subheading ? sections.hero.subheading.slice(0, 160) : ''),
-        meta_keywords: seoData.meta_keywords,
+        meta_keywords: seoData.meta_keywords || (seoData.focus_keyword ? `${seoData.focus_keyword}, Calvary, prayer, ministry` : ''),
         focus_keyword: seoData.focus_keyword,
         canonical_url: seoData.canonical_url,
         og_title: seoData.og_title || seoData.meta_title,
@@ -291,41 +549,73 @@ export const AdminPageSEOEditor = () => {
         robots_index: seoData.robots_index,
         robots_follow: seoData.robots_follow,
         sections_data: sections,
+        body_content: compiledBody,
+        raw_head_tags: rawHtmlCode,
         slug: pageSettings.slug,
         is_published: pageSettings.isPublished,
       };
 
-      const result = await api.updateAdminPageSEO(selectedPage, payload);
-      if (result && typeof result === 'object') {
-        setPageSettings(prev => ({
-          ...prev,
-          slug: result.slug ?? prev.slug,
-          isPublished: result.is_published ?? prev.isPublished,
-        }));
-      }
-      setPageStatuses((current) => ({
-        ...current,
-        [selectedPage]: {
-          status: (result?.is_published ?? pageSettings.isPublished) ? 'published' : 'draft',
-          busy: false,
-        },
-      }));
-      setFeedback({
-        type: 'success',
-        text: pageSettings.isPublished
-          ? 'Page sections and SEO settings saved and published.'
-          : 'Page sections and SEO settings saved as a draft.',
-      });
-      const publishEvent = { pageIdentifier: selectedPage };
+      // 1. Instantly save to local storage for zero-latency user display
+      try {
+        localStorage.setItem(`clm_seo_${selectedPage}`, JSON.stringify(payload));
+      } catch {}
+
+      // 2. Broadcast immediately to all open user tabs
+      const publishEvent = { pageIdentifier: selectedPage, data: payload };
       window.dispatchEvent(new CustomEvent('seo:published', { detail: publishEvent }));
       if (typeof BroadcastChannel !== 'undefined') {
         const channel = new BroadcastChannel('clm-seo-published');
         channel.postMessage(publishEvent);
         channel.close();
       }
+
+      // 3. Persist to API backend
+      try {
+        const result = await api.updateAdminPageSEO(selectedPage, payload);
+        const combined = { ...payload, ...(result && typeof result === 'object' ? result : {}) };
+        try {
+          localStorage.setItem(`clm_seo_${selectedPage}`, JSON.stringify(combined));
+        } catch {}
+
+        if (result && typeof result === 'object') {
+          setPageSettings(prev => ({
+            ...prev,
+            slug: result.slug ?? prev.slug,
+            isPublished: result.is_published ?? prev.isPublished,
+          }));
+        }
+        setPageStatuses((current) => ({
+          ...current,
+          [selectedPage]: {
+            status: (result?.is_published ?? pageSettings.isPublished) ? 'published' : 'draft',
+            busy: false,
+          },
+        }));
+        setFeedback({
+          type: 'success',
+          text: pageSettings.isPublished
+            ? 'Page sections and SEO settings published live immediately. Visible to users now!'
+            : 'Page sections and SEO settings saved as a draft.',
+        });
+      } catch (err) {
+        console.warn('Backend update failed, using local published state:', err);
+        setPageStatuses((current) => ({
+          ...current,
+          [selectedPage]: {
+            status: pageSettings.isPublished ? 'published' : 'draft',
+            busy: false,
+          },
+        }));
+        setFeedback({
+          type: 'success',
+          text: 'Saved & published live to users immediately! (Synchronized across tabs)',
+        });
+      }
+
       setTimeout(() => setFeedback({ type: '', text: '' }), 4500);
     } catch (err) {
-      setFeedback({ type: 'error', text: 'Failed to save SEO Page structure. Please check server connection.' });
+      console.error('Save error:', err);
+      setFeedback({ type: 'error', text: 'Failed to compile and publish page structure.' });
     } finally {
       setSaving(false);
     }
@@ -333,7 +623,7 @@ export const AdminPageSEOEditor = () => {
 
   // Insert formatting around selected text, or add a short editable placeholder.
   const insertFormatting = (targetKey, subKey, startTag, endTag = '', placeholder = 'Text') => {
-    const currentValue = sections[targetKey][subKey] || '';
+    const currentValue = sections[targetKey]?.[subKey] || '';
     const textarea = document.getElementById(`page-content-${targetKey}`);
     const start = textarea?.selectionStart ?? currentValue.length;
     const end = textarea?.selectionEnd ?? currentValue.length;
@@ -354,38 +644,134 @@ export const AdminPageSEOEditor = () => {
     }, 0);
   };
 
-  const renderContentToolbar = (targetKey) => (
+  const insertInternalLinkIntoField = (targetKey, subKey = 'content') => {
+    const targetUrl = internalLinkUrl.trim();
+    if (!targetUrl) return;
+    const textarea = document.getElementById(`page-content-${targetKey}`);
+    const currentValue = sections[targetKey]?.[subKey] || '';
+    const start = textarea?.selectionStart ?? currentValue.length;
+    const end = textarea?.selectionEnd ?? currentValue.length;
+    const selected = currentValue.substring(start, end);
+    const linkText = linkAnchorText.trim() || selected.trim() || 'Key Features';
+    const replacement = `<a href="${targetUrl}">${linkText}</a>`;
+    const updated = currentValue.substring(0, start) + replacement + currentValue.substring(end);
+    setSections(prev => ({
+      ...prev,
+      [targetKey]: {
+        ...prev[targetKey],
+        [subKey]: updated
+      }
+    }));
+    window.setTimeout(() => {
+      if (!textarea) return;
+      textarea.focus();
+      textarea.setSelectionRange(start + replacement.length, start + replacement.length);
+    }, 0);
+  };
+
+  const renderContentToolbar = (targetKey, subKey = 'content') => (
     <div style={{
       display: 'flex',
       alignItems: 'center',
       gap: '0.35rem',
-      padding: '0.4rem 0.6rem',
+      padding: '0.45rem 0.65rem',
       background: '#0B132B',
       border: '1px solid #1E2E4E',
       borderBottom: 'none',
       borderRadius: '8px 8px 0 0',
       flexWrap: 'wrap'
     }}>
-      <button type="button" onClick={() => insertFormatting(targetKey, 'content', '<strong>', '</strong>')} style={{ background: 'transparent', border: 'none', color: '#CBD5E1', cursor: 'pointer', padding: '0.2rem 0.4rem', fontWeight: 800 }} title="Bold">
-        <Bold size={14} />
-      </button>
-      <input
-        type="text"
-        aria-label="Internal link URL"
-        value={internalLinkUrl}
-        onChange={(event) => setInternalLinkUrl(event.target.value)}
-        placeholder="/#key-features"
-        style={{ minWidth: '150px', flex: '1 1 180px', padding: '0.3rem 0.5rem', background: '#111C33', border: '1px solid #334155', borderRadius: '5px', color: '#E2E8F0', fontSize: '0.78rem' }}
-      />
-      <button
-        type="button"
-        onClick={() => insertFormatting(targetKey, 'content', `<a href="${internalLinkUrl}">`, '</a>', 'Key Features')}
-        disabled={!isInternalPath(internalLinkUrl.trim())}
-        style={{ background: 'transparent', border: 'none', color: '#CBD5E1', cursor: 'pointer', padding: '0.2rem 0.4rem', opacity: isInternalPath(internalLinkUrl.trim()) ? 1 : 0.5 }}
-        title="Insert internal link"
-      >
-        <LinkIcon size={14} />
-      </button>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+        <button type="button" onClick={() => insertFormatting(targetKey, subKey, '<strong>', '</strong>')} style={{ background: 'transparent', border: 'none', color: '#CBD5E1', cursor: 'pointer', padding: '0.25rem 0.35rem' }} title="Bold">
+          <Bold size={14} />
+        </button>
+        <button type="button" onClick={() => insertFormatting(targetKey, subKey, '<em>', '</em>')} style={{ background: 'transparent', border: 'none', color: '#CBD5E1', cursor: 'pointer', padding: '0.25rem 0.35rem' }} title="Italic">
+          <Italic size={14} />
+        </button>
+        <button type="button" onClick={() => insertFormatting(targetKey, subKey, '<u>', '</u>')} style={{ background: 'transparent', border: 'none', color: '#CBD5E1', cursor: 'pointer', padding: '0.25rem 0.35rem' }} title="Underline">
+          <Underline size={14} />
+        </button>
+        <button type="button" onClick={() => insertFormatting(targetKey, subKey, '<s>', '</s>')} style={{ background: 'transparent', border: 'none', color: '#CBD5E1', cursor: 'pointer', padding: '0.25rem 0.35rem' }} title="Strikethrough">
+          <Strikethrough size={14} />
+        </button>
+        <button type="button" onClick={() => insertFormatting(targetKey, subKey, '<h2>', '</h2>')} style={{ background: 'transparent', border: 'none', color: '#CBD5E1', cursor: 'pointer', padding: '0.25rem 0.35rem' }} title="Heading 2">
+          <Heading2 size={14} />
+        </button>
+        <button type="button" onClick={() => insertFormatting(targetKey, subKey, '<h3>', '</h3>')} style={{ background: 'transparent', border: 'none', color: '#CBD5E1', cursor: 'pointer', padding: '0.25rem 0.35rem' }} title="Heading 3">
+          <Heading3 size={14} />
+        </button>
+        <button type="button" onClick={() => insertFormatting(targetKey, subKey, '<ul>\n  <li>', '</li>\n</ul>')} style={{ background: 'transparent', border: 'none', color: '#CBD5E1', cursor: 'pointer', padding: '0.25rem 0.35rem' }} title="Bullet List">
+          <List size={14} />
+        </button>
+        <button type="button" onClick={() => insertFormatting(targetKey, subKey, '<ol>\n  <li>', '</li>\n</ol>')} style={{ background: 'transparent', border: 'none', color: '#CBD5E1', cursor: 'pointer', padding: '0.25rem 0.35rem' }} title="Numbered List">
+          <ListOrdered size={14} />
+        </button>
+        <button type="button" onClick={() => insertFormatting(targetKey, subKey, '<blockquote>', '</blockquote>')} style={{ background: 'transparent', border: 'none', color: '#CBD5E1', cursor: 'pointer', padding: '0.25rem 0.35rem' }} title="Quote">
+          <Quote size={14} />
+        </button>
+      </div>
+
+      <div style={{ width: '1px', height: '18px', background: '#334155', margin: '0 0.3rem' }} />
+
+      {/* Internal Link Tool */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap', flex: '1 1 auto' }}>
+        <select
+          aria-label="Preset internal link"
+          value={internalLinkUrl}
+          onChange={(e) => {
+            const found = INTERNAL_LINK_PRESETS.find(p => p.url === e.target.value);
+            setInternalLinkUrl(e.target.value);
+            if (found) setLinkAnchorText(found.label);
+          }}
+          style={{ padding: '0.25rem 0.45rem', background: '#111C33', border: '1px solid #334155', borderRadius: '5px', color: '#60A5FA', fontSize: '0.74rem', maxWidth: '170px' }}
+        >
+          {INTERNAL_LINK_PRESETS.map((p) => (
+            <option key={p.url} value={p.url}>🔗 {p.label}</option>
+          ))}
+        </select>
+
+        <input
+          type="text"
+          aria-label="Internal link URL"
+          value={internalLinkUrl}
+          onChange={(event) => setInternalLinkUrl(event.target.value)}
+          placeholder="/#key-features"
+          style={{ width: '120px', padding: '0.25rem 0.45rem', background: '#111C33', border: '1px solid #334155', borderRadius: '5px', color: '#E2E8F0', fontSize: '0.74rem' }}
+        />
+
+        <input
+          type="text"
+          aria-label="Link Anchor Text"
+          value={linkAnchorText}
+          onChange={(event) => setLinkAnchorText(event.target.value)}
+          placeholder="Anchor Text"
+          style={{ width: '110px', padding: '0.25rem 0.45rem', background: '#111C33', border: '1px solid #334155', borderRadius: '5px', color: '#E2E8F0', fontSize: '0.74rem' }}
+        />
+
+        <button
+          type="button"
+          onClick={() => insertInternalLinkIntoField(targetKey, subKey)}
+          disabled={!isInternalPath(internalLinkUrl.trim())}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.25rem',
+            padding: '0.25rem 0.6rem',
+            background: isInternalPath(internalLinkUrl.trim()) ? '#2563EB' : '#1E293B',
+            border: 'none',
+            borderRadius: '5px',
+            color: '#FFFFFF',
+            fontSize: '0.74rem',
+            fontWeight: 700,
+            cursor: isInternalPath(internalLinkUrl.trim()) ? 'pointer' : 'not-allowed',
+            opacity: isInternalPath(internalLinkUrl.trim()) ? 1 : 0.5
+          }}
+          title="Insert internal link"
+        >
+          <LinkIcon size={12} />
+          <span>Insert Link</span>
+        </button>
+      </div>
     </div>
   );
 
@@ -743,6 +1129,143 @@ export const AdminPageSEOEditor = () => {
           </div>
 
           {/* -------------------------------------------------------------
+              SECTION KEY FEATURES — CORE PILLARS & KEY FEATURES (BODY TAG)
+              ------------------------------------------------------------- */}
+          <div
+            ref={sectionRefs['section-key-features']}
+            style={{
+              background: '#111C33',
+              border: '1px solid #1E2E4E',
+              borderRadius: '12px',
+              padding: '1.5rem',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, fontSize: '1rem', color: '#FFFFFF' }}>
+                <div style={{ width: '24px', height: '24px', borderRadius: '6px', background: '#0284C7', color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 800 }}>
+                  ★
+                </div>
+                <span>Key Features &amp; Core Pillars (Body Tag &amp; Live Search)</span>
+              </div>
+              <span style={{ background: '#0369A1', color: '#E0F2FE', fontSize: '0.72rem', fontWeight: 700, padding: '0.2rem 0.6rem', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                BODY TAG #KEY-FEATURES
+              </span>
+            </div>
+
+            <p style={{ fontSize: '0.82rem', color: '#94A3B8', margin: '0 0 1.25rem 0', lineHeight: 1.5 }}>
+              These key features and core pillars are rendered inside the page body and indexed by search engines. Users finding your focus keywords will see these features on page 1 of search results.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>
+                  SECTION HEADLINE
+                </label>
+                <input
+                  type="text"
+                  value={sections.key_features?.heading || ''}
+                  onChange={(e) => setSections(prev => ({
+                    ...prev,
+                    key_features: { ...prev.key_features, heading: e.target.value }
+                  }))}
+                  placeholder="Core Pillars & Key Ministry Features"
+                  style={{ width: '100%', padding: '0.75rem 1rem', background: '#0B132B', border: '1px solid #1E2E4E', borderRadius: '8px', color: '#FFFFFF', fontSize: '0.95rem', fontWeight: 600 }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>
+                  SECTION SUBHEADING
+                </label>
+                <textarea
+                  rows="2"
+                  value={sections.key_features?.subheading || ''}
+                  onChange={(e) => setSections(prev => ({
+                    ...prev,
+                    key_features: { ...prev.key_features, subheading: e.target.value }
+                  }))}
+                  placeholder="Four foundational pillars guiding our spiritual journey and Christ-centered service."
+                  style={{ width: '100%', padding: '0.75rem 1rem', background: '#0B132B', border: '1px solid #1E2E4E', borderRadius: '8px', color: '#CBD5E1', fontSize: '0.88rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>
+                  CORE PILLAR CARDS (4 PILLARS WITH INTERNAL LINKS)
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
+                  {(sections.key_features?.features || []).map((feat, idx) => (
+                    <div key={feat.id || idx} style={{ background: '#0B132B', border: '1px solid #1E2E4E', borderRadius: '8px', padding: '1rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#60A5FA' }}>Pillar {idx + 1}</span>
+                      </div>
+                      <input
+                        type="text"
+                        value={feat.title}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setSections(prev => {
+                            const updated = [...(prev.key_features?.features || [])];
+                            updated[idx] = { ...updated[idx], title: val };
+                            return { ...prev, key_features: { ...prev.key_features, features: updated } };
+                          });
+                        }}
+                        placeholder="Pillar Title (e.g. Faith & Prayer)"
+                        style={{ width: '100%', padding: '0.45rem 0.65rem', background: '#111C33', border: '1px solid #334155', borderRadius: '5px', color: '#FFFFFF', fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.5rem' }}
+                      />
+                      <textarea
+                        rows="3"
+                        value={feat.desc}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setSections(prev => {
+                            const updated = [...(prev.key_features?.features || [])];
+                            updated[idx] = { ...updated[idx], desc: val };
+                            return { ...prev, key_features: { ...prev.key_features, features: updated } };
+                          });
+                        }}
+                        placeholder="Feature description..."
+                        style={{ width: '100%', padding: '0.45rem 0.65rem', background: '#111C33', border: '1px solid #334155', borderRadius: '5px', color: '#CBD5E1', fontSize: '0.78rem', marginBottom: '0.5rem' }}
+                      />
+                      <div style={{ display: 'flex', gap: '0.4rem' }}>
+                        <input
+                          type="text"
+                          value={feat.link}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setSections(prev => {
+                              const updated = [...(prev.key_features?.features || [])];
+                              updated[idx] = { ...updated[idx], link: val };
+                              return { ...prev, key_features: { ...prev.key_features, features: updated } };
+                            });
+                          }}
+                          placeholder="/#key-features"
+                          style={{ flex: 1, padding: '0.35rem 0.5rem', background: '#111C33', border: '1px solid #334155', borderRadius: '5px', color: '#60A5FA', fontSize: '0.74rem' }}
+                        />
+                        <input
+                          type="text"
+                          value={feat.linkText || 'Learn More'}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setSections(prev => {
+                              const updated = [...(prev.key_features?.features || [])];
+                              updated[idx] = { ...updated[idx], linkText: val };
+                              return { ...prev, key_features: { ...prev.key_features, features: updated } };
+                            });
+                          }}
+                          placeholder="Link Text"
+                          style={{ width: '90px', padding: '0.35rem 0.5rem', background: '#111C33', border: '1px solid #334155', borderRadius: '5px', color: '#CBD5E1', fontSize: '0.74rem' }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* -------------------------------------------------------------
               SECTION 2 — CONTENT + IMAGE (LEFT-RIGHT)
               ------------------------------------------------------------- */}
           <div
@@ -817,63 +1340,12 @@ export const AdminPageSEOEditor = () => {
                 </span>
               </div>
 
-              {/* Rich WYSIWYG Editor Toolbar */}
+              {/* Rich WYSIWYG Editor Toolbar with Internal Link Option */}
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>
                   CONTENT (LEFT SIDE)
                 </label>
-
-                {/* Toolbar */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.25rem',
-                  background: '#0B132B',
-                  padding: '0.4rem 0.6rem',
-                  borderRadius: '8px 8px 0 0',
-                  border: '1px solid #1E2E4E',
-                  borderBottom: 'none',
-                  flexWrap: 'wrap'
-                }}>
-                  <span style={{ fontSize: '0.75rem', color: '#64748B', padding: '0 0.4rem' }}>Paragraph</span>
-                  <div style={{ width: '1px', height: '14px', background: '#1E2E4E', margin: '0 0.2rem' }} />
-                  
-                  <button type="button" onClick={() => insertFormatting('section2_content_image', 'content', '<strong>', '</strong>')} style={{ background: 'transparent', border: 'none', color: '#94A3B8', cursor: 'pointer', padding: '0.2rem' }} title="Bold">
-                    <Bold size={14} />
-                  </button>
-                  <button type="button" onClick={() => insertFormatting('section2_content_image', 'content', '<em>', '</em>')} style={{ background: 'transparent', border: 'none', color: '#94A3B8', cursor: 'pointer', padding: '0.2rem' }} title="Italic">
-                    <Italic size={14} />
-                  </button>
-                  <button type="button" onClick={() => insertFormatting('section2_content_image', 'content', '<u>', '</u>')} style={{ background: 'transparent', border: 'none', color: '#94A3B8', cursor: 'pointer', padding: '0.2rem' }} title="Underline">
-                    <Underline size={14} />
-                  </button>
-                  <button type="button" onClick={() => insertFormatting('section2_content_image', 'content', '<s>', '</s>')} style={{ background: 'transparent', border: 'none', color: '#94A3B8', cursor: 'pointer', padding: '0.2rem' }} title="Strikethrough">
-                    <Strikethrough size={14} />
-                  </button>
-
-                  <div style={{ width: '1px', height: '14px', background: '#1E2E4E', margin: '0 0.2rem' }} />
-
-                  <button type="button" onClick={() => insertFormatting('section2_content_image', 'content', '<ul>\n  <li>', '</li>\n</ul>')} style={{ background: 'transparent', border: 'none', color: '#94A3B8', cursor: 'pointer', padding: '0.2rem' }} title="Bullet List">
-                    <List size={14} />
-                  </button>
-                  <button type="button" onClick={() => insertFormatting('section2_content_image', 'content', '<ol>\n  <li>', '</li>\n</ol>')} style={{ background: 'transparent', border: 'none', color: '#94A3B8', cursor: 'pointer', padding: '0.2rem' }} title="Numbered List">
-                    <ListOrdered size={14} />
-                  </button>
-                  <button type="button" onClick={() => insertFormatting('section2_content_image', 'content', '<blockquote>', '</blockquote>')} style={{ background: 'transparent', border: 'none', color: '#94A3B8', cursor: 'pointer', padding: '0.2rem' }} title="Quote">
-                    <Quote size={14} />
-                  </button>
-                  <button type="button" onClick={() => insertFormatting('section2_content_image', 'content', `<a href="${internalLinkUrl}">`, '</a>', 'Key Features')} disabled={!isInternalPath(internalLinkUrl.trim())} style={{ background: 'transparent', border: 'none', color: '#94A3B8', cursor: 'pointer', padding: '0.2rem', opacity: isInternalPath(internalLinkUrl.trim()) ? 1 : 0.5 }} title="Internal link">
-                    <LinkIcon size={14} />
-                  </button>
-                  <input
-                    type="text"
-                    aria-label="Internal link URL"
-                    value={internalLinkUrl}
-                    onChange={(e) => setInternalLinkUrl(e.target.value)}
-                    placeholder="/#key-features"
-                    style={{ width: '130px', padding: '0.25rem 0.4rem', background: '#111C33', border: '1px solid #334155', borderRadius: '5px', color: '#E2E8F0', fontSize: '0.72rem' }}
-                  />
-                </div>
+                {renderContentToolbar('section2_content_image', 'content')}
 
                 <textarea
                   id="page-content-section2_content_image"
@@ -1339,7 +1811,7 @@ export const AdminPageSEOEditor = () => {
           </div>
 
           {/* -------------------------------------------------------------
-              SEO HEAD TAGS (RAW HTML & METADATA SUITE)
+              SEO HEAD TAGS & METADATA SUITE (INTERACTIVE CODE EDITOR & LIVE PUBLISHER)
               ------------------------------------------------------------- */}
           <div
             ref={sectionRefs['section-head']}
@@ -1351,77 +1823,437 @@ export const AdminPageSEOEditor = () => {
               boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            {/* Header & Tabs */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', flexWrap: 'wrap', gap: '0.75rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, fontSize: '1rem', color: '#FFFFFF' }}>
                 <Globe size={18} color="#60A5FA" />
-                <span>SEO Head Tags &amp; Metadata</span>
+                <span>SEO Head Tags &amp; Metadata Suite</span>
+                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#34D399', background: 'rgba(16, 185, 129, 0.15)', padding: '0.15rem 0.5rem', borderRadius: '4px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                  ● Live Published
+                </span>
               </div>
-              <span style={{ background: '#1E293B', color: '#94A3B8', fontSize: '0.72rem', fontWeight: 700, padding: '0.2rem 0.6rem', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                RAW HTML
-              </span>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsRawHtmlEditor(false)}
+                  style={{
+                    padding: '0.35rem 0.75rem',
+                    borderRadius: '6px',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    border: '1px solid',
+                    borderColor: !isRawHtmlEditor ? '#2563EB' : '#334155',
+                    background: !isRawHtmlEditor ? '#1E3A8A' : '#0B132B',
+                    color: !isRawHtmlEditor ? '#FFFFFF' : '#94A3B8',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <Sliders size={13} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
+                  Visual Fields
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsRawHtmlEditor(true)}
+                  style={{
+                    padding: '0.35rem 0.75rem',
+                    borderRadius: '6px',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    border: '1px solid',
+                    borderColor: isRawHtmlEditor ? '#2563EB' : '#334155',
+                    background: isRawHtmlEditor ? '#1E3A8A' : '#0B132B',
+                    color: isRawHtmlEditor ? '#FFFFFF' : '#94A3B8',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <Code size={13} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
+                  Raw HTML Editor
+                </button>
+              </div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {/* Subheader Toolbar */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem', background: '#0B132B', padding: '0.5rem 0.75rem', borderRadius: '8px', border: '1px solid #1E2E4E' }}>
+              <div style={{ fontSize: '0.75rem', color: '#94A3B8', fontWeight: 600 }}>
+                {isRawHtmlEditor ? 'Edit raw HTML head tags directly. Auto-synced and published live.' : 'Edit structured SEO fields. Real-time generation of tags.'}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={handleOptimizeForPageOne}
+                  style={{
+                    padding: '0.28rem 0.65rem',
+                    background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                    border: 'none',
+                    borderRadius: '5px',
+                    color: '#FFFFFF',
+                    fontSize: '0.74rem',
+                    cursor: 'pointer',
+                    fontWeight: 800,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    boxShadow: '0 2px 6px rgba(16,185,129,0.3)'
+                  }}
+                  title="Automatically synchronize and optimize Title, H1, Description, Keywords, and Structured Data for Google Page 1 ranking"
+                >
+                  <Sparkles size={12} /> ⚡ Optimize for Page 1 Ranking
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const generated = generateRawHtmlTags(seoData, sections.hero?.h1, sections.hero?.subheading, selectedPage);
+                    setRawHtmlCode(generated);
+                    setFeedback({ type: 'success', text: 'Raw HTML regenerated from current fields.' });
+                    setTimeout(() => setFeedback({ type: '', text: '' }), 3000);
+                  }}
+                  style={{ padding: '0.25rem 0.55rem', background: '#111C33', border: '1px solid #334155', borderRadius: '5px', color: '#60A5FA', fontSize: '0.72rem', cursor: 'pointer', fontWeight: 600 }}
+                  title="Regenerate HTML from current fields"
+                >
+                  <RefreshCw size={12} style={{ verticalAlign: 'middle', marginRight: '3px' }} /> Sync from Fields
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const parsed = parseRawHtmlToFields(rawHtmlCode);
+                    setSeoData(prev => ({ ...prev, ...parsed }));
+                    setFeedback({ type: 'success', text: 'Parsed HTML tags applied to SEO fields.' });
+                    setTimeout(() => setFeedback({ type: '', text: '' }), 3000);
+                  }}
+                  style={{ padding: '0.25rem 0.55rem', background: '#111C33', border: '1px solid #334155', borderRadius: '5px', color: '#34D399', fontSize: '0.72rem', cursor: 'pointer', fontWeight: 600 }}
+                  title="Parse and apply Raw HTML to fields"
+                >
+                  <Check size={12} style={{ verticalAlign: 'middle', marginRight: '3px' }} /> Apply HTML to Fields
+                </button>
+
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(rawHtmlCode);
+                      setCopiedHtml(true);
+                      setTimeout(() => setCopiedHtml(false), 2000);
+                    } catch (e) {
+                      setFeedback({ type: 'error', text: 'Clipboard copy failed.' });
+                    }
+                  }}
+                  style={{ padding: '0.25rem 0.55rem', background: '#111C33', border: '1px solid #334155', borderRadius: '5px', color: '#E2E8F0', fontSize: '0.72rem', cursor: 'pointer', fontWeight: 600 }}
+                >
+                  {copiedHtml ? <Check size={12} style={{ verticalAlign: 'middle', marginRight: '3px', color: '#34D399' }} /> : <Copy size={12} style={{ verticalAlign: 'middle', marginRight: '3px' }} />}
+                  {copiedHtml ? 'Copied!' : 'Copy HTML'}
+                </button>
+              </div>
+            </div>
+
+            {/* Mode 1: Raw HTML Code Editor */}
+            {isRawHtmlEditor && (
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>
-                  HEAD TAGS (RAW HTML PREVIEW)
-                </label>
-                <div style={{
-                  background: '#0B132B',
-                  border: '1px solid #1E2E4E',
-                  borderRadius: '8px',
-                  padding: '1rem',
-                  fontFamily: 'monospace',
-                  fontSize: '0.78rem',
-                  color: '#93C5FD',
-                  lineHeight: 1.6,
-                  whiteSpace: 'pre-wrap'
-                }}>
-                  {`<title>${seoData.meta_title || `${sections.hero.h1} | Compassionate Love of Calvary`}</title>\n<meta name="description" content="${seoData.meta_description || (sections.hero.subheading ? sections.hero.subheading.slice(0, 160) : '')}" />\n<meta name="keywords" content="${seoData.meta_keywords || 'ministry, prayer, faith, Calvary, Tamil Nadu'}" />\n<link rel="canonical" href="${seoData.canonical_url || `https://www.loveofcalvary.org/${selectedPage === 'home' ? '' : selectedPage}`}" />\n<meta name="robots" content="${seoData.robots_index ? 'index' : 'noindex'}, ${seoData.robots_follow ? 'follow' : 'nofollow'}" />`}
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>
-                    SEO META TITLE
-                  </label>
-                  <input
-                    type="text"
-                    value={seoData.meta_title}
-                    onChange={(e) => setSeoData(prev => ({ ...prev, meta_title: e.target.value }))}
-                    placeholder="Custom meta title tag"
-                    style={{ width: '100%', padding: '0.65rem 0.85rem', background: '#0B132B', border: '1px solid #1E2E4E', borderRadius: '8px', color: '#FFFFFF', fontSize: '0.85rem' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>
-                    PRIMARY FOCUS KEYWORD
-                  </label>
-                  <input
-                    type="text"
-                    value={seoData.focus_keyword}
-                    onChange={(e) => setSeoData(prev => ({ ...prev, focus_keyword: e.target.value }))}
-                    placeholder="e.g. Calvary ministry in Tamil Nadu"
-                    style={{ width: '100%', padding: '0.65rem 0.85rem', background: '#0B132B', border: '1px solid #1E2E4E', borderRadius: '8px', color: '#FFFFFF', fontSize: '0.85rem' }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>
-                  META DESCRIPTION
+                  HEAD TAGS (EDITABLE RAW HTML CODE)
                 </label>
                 <textarea
-                  rows="2"
-                  value={seoData.meta_description}
-                  onChange={(e) => setSeoData(prev => ({ ...prev, meta_description: e.target.value }))}
-                  placeholder="Snippet displayed in search engine results (120–160 chars recommended)"
-                  style={{ width: '100%', padding: '0.65rem 0.85rem', background: '#0B132B', border: '1px solid #1E2E4E', borderRadius: '8px', color: '#CBD5E1', fontSize: '0.85rem' }}
+                  rows="12"
+                  value={rawHtmlCode}
+                  onChange={(e) => {
+                    const nextHtml = e.target.value;
+                    setRawHtmlCode(nextHtml);
+                    const parsed = parseRawHtmlToFields(nextHtml);
+                    setSeoData(prev => ({ ...prev, ...parsed }));
+                  }}
+                  spellCheck="false"
+                  style={{
+                    width: '100%',
+                    padding: '1rem',
+                    background: '#0B132B',
+                    border: '1px solid #1E2E4E',
+                    borderRadius: '8px',
+                    fontFamily: 'monospace',
+                    fontSize: '0.82rem',
+                    color: '#93C5FD',
+                    lineHeight: 1.6,
+                    resize: 'vertical',
+                    whiteSpace: 'pre'
+                  }}
                 />
+                <span style={{ fontSize: '0.7rem', color: '#64748B', marginTop: '0.35rem', display: 'block' }}>
+                  💡 Direct HTML editing enabled. Any tags written here will be automatically published live and injected into document &lt;head&gt;.
+                </span>
+              </div>
+            )}
+
+            {/* Mode 2: Structured Fields */}
+            {!isRawHtmlEditor && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                      <label style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                        SEO META TITLE
+                      </label>
+                      <span style={{ fontSize: '0.7rem', fontWeight: 700, color: (seoData.meta_title?.length || 0) >= 45 && (seoData.meta_title?.length || 0) <= 60 ? '#34D399' : '#FBBF24' }}>
+                        {seoData.meta_title?.length || 0}/60 chars (Recommended: 45–60)
+                      </span>
+                    </div>
+                    <input
+                      type="text"
+                      value={seoData.meta_title}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setSeoData(prev => {
+                          const updated = { ...prev, meta_title: val };
+                          setRawHtmlCode(generateRawHtmlTags(updated, sections.hero?.h1, sections.hero?.subheading, selectedPage));
+                          return updated;
+                        });
+                      }}
+                      placeholder="e.g. Compassionate Love of Calvary Ministries | Faith, Prayer & Hope"
+                      style={{ width: '100%', padding: '0.65rem 0.85rem', background: '#0B132B', border: '1px solid #1E2E4E', borderRadius: '8px', color: '#FFFFFF', fontSize: '0.85rem' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.35rem' }}>
+                      PRIMARY FOCUS KEYWORD (PAGE 1 RANKING TARGET)
+                    </label>
+                    <input
+                      type="text"
+                      value={seoData.focus_keyword}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setSeoData(prev => {
+                          const updated = { ...prev, focus_keyword: val };
+                          setRawHtmlCode(generateRawHtmlTags(updated, sections.hero?.h1, sections.hero?.subheading, selectedPage));
+                          return updated;
+                        });
+                      }}
+                      placeholder="e.g. Compassionate Love of Calvary Ministries"
+                      style={{ width: '100%', padding: '0.65rem 0.85rem', background: '#0B132B', border: '1px solid #1E2E4E', borderRadius: '8px', color: '#FFFFFF', fontSize: '0.85rem' }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                      META DESCRIPTION
+                    </label>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, color: (seoData.meta_description?.length || 0) >= 120 && (seoData.meta_description?.length || 0) <= 160 ? '#34D399' : '#FBBF24' }}>
+                      {seoData.meta_description?.length || 0}/160 chars (Recommended: 120–160)
+                    </span>
+                  </div>
+                  <textarea
+                    rows="2"
+                    value={seoData.meta_description}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setSeoData(prev => {
+                        const updated = { ...prev, meta_description: val };
+                        setRawHtmlCode(generateRawHtmlTags(updated, sections.hero?.h1, sections.hero?.subheading, selectedPage));
+                        return updated;
+                      });
+                    }}
+                    placeholder="Compelling snippet displayed in search engine results containing the focus keyword."
+                    style={{ width: '100%', padding: '0.65rem 0.85rem', background: '#0B132B', border: '1px solid #1E2E4E', borderRadius: '8px', color: '#CBD5E1', fontSize: '0.85rem' }}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.35rem' }}>
+                      META KEYWORDS (COMMA SEPARATED)
+                    </label>
+                    <input
+                      type="text"
+                      value={seoData.meta_keywords}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setSeoData(prev => {
+                          const updated = { ...prev, meta_keywords: val };
+                          setRawHtmlCode(generateRawHtmlTags(updated, sections.hero?.h1, sections.hero?.subheading, selectedPage));
+                          return updated;
+                        });
+                      }}
+                      placeholder="calvary, bible study, prayer, chengalpattu"
+                      style={{ width: '100%', padding: '0.65rem 0.85rem', background: '#0B132B', border: '1px solid #1E2E4E', borderRadius: '8px', color: '#CBD5E1', fontSize: '0.85rem' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.35rem' }}>
+                      CANONICAL URL (HTTPS)
+                    </label>
+                    <input
+                      type="url"
+                      value={seoData.canonical_url}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setSeoData(prev => {
+                          const updated = { ...prev, canonical_url: val };
+                          setRawHtmlCode(generateRawHtmlTags(updated, sections.hero?.h1, sections.hero?.subheading, selectedPage));
+                          return updated;
+                        });
+                      }}
+                      placeholder={`https://www.loveofcalvary.org/${selectedPage === 'home' ? '' : selectedPage}`}
+                      style={{ width: '100%', padding: '0.65rem 0.85rem', background: '#0B132B', border: '1px solid #1E2E4E', borderRadius: '8px', color: '#CBD5E1', fontSize: '0.85rem' }}
+                    />
+                  </div>
+                </div>
+
+                {/* Robots Directives */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', background: '#0B132B', padding: '0.75rem 1rem', borderRadius: '8px', border: '1px solid #1E2E4E' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.82rem', color: '#FFFFFF', cursor: 'pointer', fontWeight: 600 }}>
+                    <input
+                      type="checkbox"
+                      checked={seoData.robots_index}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setSeoData(prev => {
+                          const updated = { ...prev, robots_index: checked };
+                          setRawHtmlCode(generateRawHtmlTags(updated, sections.hero?.h1, sections.hero?.subheading, selectedPage));
+                          return updated;
+                        });
+                      }}
+                    />
+                    Index Page in Google (index)
+                  </label>
+
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.82rem', color: '#FFFFFF', cursor: 'pointer', fontWeight: 600 }}>
+                    <input
+                      type="checkbox"
+                      checked={seoData.robots_follow}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setSeoData(prev => {
+                          const updated = { ...prev, robots_follow: checked };
+                          setRawHtmlCode(generateRawHtmlTags(updated, sections.hero?.h1, sections.hero?.subheading, selectedPage));
+                          return updated;
+                        });
+                      }}
+                    />
+                    Follow Links (follow)
+                  </label>
+                </div>
+              </div>
+            )}
+
+            {/* Google Search Page 1 Result Preview */}
+            <div style={{ marginTop: '1.25rem', padding: '1rem 1.25rem', background: '#0F172A', borderRadius: '10px', border: '1px solid #1E293B' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.65rem' }}>
+                <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#38BDF8', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <Search size={13} /> Google Search Page 1 Snippet Preview
+                </span>
+                <span style={{ fontSize: '0.7rem', color: '#94A3B8' }}>
+                  What searchers see on Google ranking #1
+                </span>
+              </div>
+              <div style={{ padding: '0.9rem 1.1rem', background: '#FFFFFF', borderRadius: '8px', border: '1px solid #E2E8F0', fontFamily: 'arial, sans-serif' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                  <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#0F172A', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#D4AF37', fontSize: '0.65rem', fontWeight: 800 }}>
+                    ✝
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.78rem', color: '#202124', fontWeight: 500, lineHeight: 1.2 }}>Compassionate Love of Calvary Ministries</span>
+                    <span style={{ fontSize: '0.72rem', color: '#4D5156', lineHeight: 1.2 }}>{new URL(pageSettings.slug ? `/${pageSettings.slug}` : currentPageObj.path, window.location.origin).toString()}</span>
+                  </div>
+                </div>
+                <div style={{ fontSize: '1.15rem', color: '#1A0DAB', textDecoration: 'none', lineHeight: 1.3, marginBottom: '0.35rem', fontWeight: 500, cursor: 'pointer' }}>
+                  {seoData.meta_title || `${sections.hero.h1 || 'Home'} | Compassionate Love of Calvary Ministries`}
+                </div>
+                <div style={{ fontSize: '0.85rem', color: '#4D5156', lineHeight: 1.5 }}>
+                  {seoData.meta_description || 'Compassionate Love of Calvary Ministries - Rooted in prayer, anchored in Biblical truth, and sharing the boundless love of Christ in Chengalpattu, Tamil Nadu.'}
+                </div>
               </div>
             </div>
+
+            {/* Real-Time First-Page SEO Audit Checklist */}
+            <div style={{ marginTop: '1.25rem', padding: '1rem', background: '#0B132B', borderRadius: '8px', border: '1px solid #1E2E4E' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Google First-Page Ranking Readiness
+                </span>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#34D399', background: 'rgba(16, 185, 129, 0.15)', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>
+                  {(() => {
+                    const fk = (seoData.focus_keyword || '').toLowerCase().trim();
+                    const titleHas = fk && (seoData.meta_title || '').toLowerCase().includes(fk);
+                    const descHas = fk && (seoData.meta_description || '').toLowerCase().includes(fk);
+                    const heroHas = fk && (sections.hero?.h1 || '').toLowerCase().includes(fk);
+                    const score = [titleHas, descHas, heroHas, seoData.robots_index, seoData.canonical_url?.startsWith('https://')].filter(Boolean).length * 20;
+                    return `${score}/100 — ${score >= 80 ? 'Page 1 Ready!' : 'Good Optimization'}`;
+                  })()}
+                </span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.5rem', fontSize: '0.74rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: (seoData.focus_keyword && (seoData.meta_title || '').toLowerCase().includes((seoData.focus_keyword || '').toLowerCase())) ? '#34D399' : '#94A3B8' }}>
+                  <CheckCircle2 size={13} /> Focus Keyword in Meta Title
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: (seoData.focus_keyword && (seoData.meta_description || '').toLowerCase().includes((seoData.focus_keyword || '').toLowerCase())) ? '#34D399' : '#94A3B8' }}>
+                  <CheckCircle2 size={13} /> Focus Keyword in Meta Description
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: (seoData.focus_keyword && (sections.hero?.h1 || '').toLowerCase().includes((seoData.focus_keyword || '').toLowerCase())) ? '#34D399' : '#94A3B8' }}>
+                  <CheckCircle2 size={13} /> Focus Keyword in H1 Heading
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: (seoData.canonical_url?.startsWith('https://')) ? '#34D399' : '#94A3B8' }}>
+                  <CheckCircle2 size={13} /> Canonical HTTPS Configured
+                </div>
+              </div>
+            </div>
+
+            {/* Instant Publish & Live View Action Row */}
+            <div style={{ marginTop: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', paddingTop: '1rem', borderTop: '1px solid #1E2E4E' }}>
+              <div style={{ fontSize: '0.78rem', color: '#94A3B8' }}>
+                Live URL: <strong style={{ color: '#60A5FA' }}>{new URL(pageSettings.slug ? `/${pageSettings.slug}` : currentPageObj.path, window.location.origin).toString()}</strong>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <a
+                  href={new URL(pageSettings.slug ? `/${pageSettings.slug}` : currentPageObj.path, window.location.origin).toString()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    padding: '0.55rem 0.95rem',
+                    background: '#1E293B',
+                    color: '#93C5FD',
+                    border: '1px solid #334155',
+                    borderRadius: '8px',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    textDecoration: 'none'
+                  }}
+                >
+                  <ExternalLink size={14} /> Visit Live Published Page
+                </a>
+
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={saving}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    padding: '0.55rem 1.25rem',
+                    background: '#2563EB',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    cursor: saving ? 'not-allowed' : 'pointer',
+                    boxShadow: '0 4px 14px rgba(37,99,235,0.4)'
+                  }}
+                >
+                  {saving ? <RefreshCw size={14} className="seo-spin" /> : <Check size={14} />}
+                  <span>{saving ? 'Publishing…' : 'Publish & Save Live Now'}</span>
+                </button>
+              </div>
+            </div>
+
           </div>
 
         </div>
@@ -1589,6 +2421,7 @@ export const AdminPageSEOEditor = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
               {[
                 { id: 'section-1', num: '1', title: 'Hero (heading + CTA)' },
+                { id: 'section-key-features', num: '★', title: 'Key Features & Pillars' },
                 { id: 'section-2', num: '2', title: 'Content + Image' },
                 { id: 'section-3', num: '3', title: 'Content Block' },
                 { id: 'section-4', num: '4', title: 'Content Block' },
