@@ -14,18 +14,181 @@ import {
 } from 'lucide-react';
 
 const PAGES = [
-  { id: 'home', name: 'Home Page', path: ROUTES.HOME, defaultKw: 'compassionate love of calvary ministries' },
-  { id: 'about', name: 'About Page', path: ROUTES.ABOUT, defaultKw: 'christian ministry chengalpattu' },
-  { id: 'ministries', name: 'Ministries Page', path: ROUTES.MINISTRIES, defaultKw: 'church ministries and community outreach' },
-  { id: 'bible', name: 'Bible Page', path: ROUTES.BIBLE, defaultKw: 'holy scriptures bible reading plans' },
-  { id: 'study', name: 'Study Page', path: ROUTES.STUDY, defaultKw: 'verse by verse bible studies discipleship' },
-  { id: 'devotional', name: 'Devotional Page', path: ROUTES.DEVOTIONAL, defaultKw: 'daily christian devotionals morning prayer' },
-  { id: 'sermons', name: 'Sermons Page', path: ROUTES.SERMONS, defaultKw: 'gospel sermons video messages faith' },
-  { id: 'events', name: 'Events Page', path: ROUTES.EVENTS, defaultKw: 'worship prayer assembly church events' },
-  { id: 'blog', name: 'Blog Page', path: ROUTES.BLOG, defaultKw: 'christian living articles spiritual growth' },
-  { id: 'media', name: 'Media Page', path: ROUTES.MEDIA, defaultKw: 'ministry worship photos video gallery' },
-  { id: 'contact', name: 'Contact Page', path: ROUTES.CONTACT, defaultKw: 'prayer request pastor contact chengalpattu' },
+  { id: 'home', name: 'Home Page', path: ROUTES.HOME, defaultKw: 'Compassionate Love of Calvary Ministries' },
+  { id: 'about', name: 'About Page', path: ROUTES.ABOUT, defaultKw: 'About Compassionate Love of Calvary Ministries' },
+  { id: 'ministries', name: 'Ministries Page', path: ROUTES.MINISTRIES, defaultKw: 'Christian Ministries in Chengalpattu' },
+  { id: 'bible', name: 'Bible Page', path: ROUTES.BIBLE, defaultKw: 'Bible Teaching Ministry' },
+  { id: 'study', name: 'Study Page', path: ROUTES.STUDY, defaultKw: 'Christian Bible Study' },
+  { id: 'devotional', name: 'Devotional Page', path: ROUTES.DEVOTIONAL, defaultKw: 'Christian Devotionals for Daily Faith' },
+  { id: 'sermons', name: 'Sermons Page', path: ROUTES.SERMONS, defaultKw: 'Christian Sermons' },
+  { id: 'events', name: 'Events Page', path: ROUTES.EVENTS, defaultKw: 'Christian Worship and Fellowship Events' },
+  { id: 'blog', name: 'Blog Page', path: ROUTES.BLOG, defaultKw: 'Ministry for Faith and Spiritual Growth' },
+  { id: 'media', name: 'Media Page', path: ROUTES.MEDIA, defaultKw: 'Gospel Ministry Worship & Media' },
+  { id: 'contact', name: 'Contact Page', path: ROUTES.CONTACT, defaultKw: 'Contact Compassionate Love of Calvary Ministries' },
 ];
+
+export const SEO_KEYWORDS_50_DATABASE = {
+  primary: [
+    { no: 1, keyword: 'Compassionate Love of Calvary Ministries', targetPage: 'home', pageName: 'Home (/)' },
+    { no: 2, keyword: 'Christian ministry in Chengalpattu', targetPage: 'home', pageName: 'Home (/)' },
+    { no: 3, keyword: 'Church in Chengalpattu', targetPage: 'home', pageName: 'Home (/)' },
+    { no: 4, keyword: 'Christian ministries in Tamil Nadu', targetPage: 'ministries', pageName: 'Ministries (/ministries)' },
+    { no: 5, keyword: 'Bible teaching ministry', targetPage: 'bible', pageName: 'Bible (/bible)' },
+    { no: 6, keyword: 'Christian Bible study', targetPage: 'study', pageName: 'Study (/study)' },
+    { no: 7, keyword: 'Christian devotional', targetPage: 'devotional', pageName: 'Devotional (/devotional)' },
+    { no: 8, keyword: 'Christian sermons', targetPage: 'sermons', pageName: 'Sermons (/sermons)' },
+    { no: 9, keyword: 'Prayer ministry in Chengalpattu', targetPage: 'ministries', pageName: 'Ministries (/ministries)' },
+    { no: 10, keyword: 'Faith-based Christian ministry', targetPage: 'about', pageName: 'About (/about)' },
+  ],
+  longTail: [
+    { no: 11, keyword: 'Compassionate Christian ministry in Tamil Nadu', relevantPages: ['about', 'home', 'ministries'] },
+    { no: 12, keyword: "Ministry sharing God's love and hope", relevantPages: ['home', 'about'] },
+    { no: 13, keyword: 'Christ-centered ministry in Chengalpattu', relevantPages: ['home', 'about', 'contact'] },
+    { no: 14, keyword: 'Christian fellowship in Chengalpattu', relevantPages: ['home', 'events', 'contact'] },
+    { no: 15, keyword: 'Biblical teachings for daily life', relevantPages: ['bible', 'study'] },
+    { no: 16, keyword: 'Bible lessons for spiritual growth', relevantPages: ['bible', 'study'] },
+    { no: 17, keyword: 'Daily Christian devotional for spiritual growth', relevantPages: ['devotional'] },
+    { no: 18, keyword: "Bible verses about God's compassionate love", relevantPages: ['bible', 'devotional'] },
+    { no: 19, keyword: 'Christian prayer and spiritual guidance', relevantPages: ['contact', 'ministries'] },
+    { no: 20, keyword: 'Ministry for faith and spiritual growth', relevantPages: ['about', 'home', 'blog'] },
+    { no: 21, keyword: "Understanding God's grace in Christianity", relevantPages: ['sermons', 'study'] },
+    { no: 22, keyword: 'How to grow in Christian faith', relevantPages: ['study', 'sermons', 'blog'] },
+    { no: 23, keyword: 'How to develop a daily prayer habit', relevantPages: ['devotional', 'contact'] },
+    { no: 24, keyword: 'Bible study resources for beginners', relevantPages: ['study', 'bible'] },
+    { no: 25, keyword: 'Christian teachings about love and forgiveness', relevantPages: ['sermons', 'devotional'] },
+  ],
+  userSearchingIntent: [
+    { no: 26, question: 'Where can I find a Christian ministry near me?', targetPage: 'contact' },
+    { no: 27, question: 'Which church can I visit in Chengalpattu?', targetPage: 'home' },
+    { no: 28, question: 'Where can I learn the Bible online?', targetPage: 'study' },
+    { no: 29, question: 'How can I grow closer to God?', targetPage: 'devotional' },
+    { no: 30, question: 'Where can I find daily Bible verses?', targetPage: 'bible' },
+    { no: 31, question: "What is God's compassionate love?", targetPage: 'about' },
+    { no: 32, question: 'How can I strengthen my faith in Jesus?', targetPage: 'sermons' },
+    { no: 33, question: 'Where can I find Christian sermons online?', targetPage: 'sermons' },
+    { no: 34, question: 'How can I start studying the Bible?', targetPage: 'study' },
+    { no: 35, question: 'Where can I find Christian devotionals for today?', targetPage: 'devotional' },
+    { no: 36, question: 'How can prayer help me grow spiritually?', targetPage: 'ministries' },
+    { no: 37, question: 'Where can I find Bible teachings in Tamil?', targetPage: 'bible' },
+    { no: 38, question: "How can I understand God's grace?", targetPage: 'sermons' },
+    { no: 39, question: 'What does the Bible teach about forgiveness?', targetPage: 'sermons' },
+    { no: 40, question: 'How can I learn more about Jesus Christ?', targetPage: 'about' },
+  ],
+  localSeo: [
+    { no: 41, keyword: 'Christian ministry near Chengalpattu', relevantPages: ['home', 'contact'] },
+    { no: 42, keyword: 'Bible teaching in Chengalpattu', relevantPages: ['bible', 'study'] },
+    { no: 43, keyword: 'Christian prayer fellowship in Tamil Nadu', relevantPages: ['ministries', 'events'] },
+    { no: 44, keyword: 'Christian spiritual guidance in Chengalpattu', relevantPages: ['contact', 'about'] },
+    { no: 45, keyword: 'Christian worship and fellowship', relevantPages: ['home', 'events'] },
+    { no: 46, keyword: 'Gospel ministry in Tamil Nadu', relevantPages: ['ministries', 'home'] },
+    { no: 47, keyword: 'Bible study fellowship in Chengalpattu', relevantPages: ['study'] },
+    { no: 48, keyword: 'Christian ministry for spiritual encouragement', relevantPages: ['about', 'devotional'] },
+    { no: 49, keyword: 'Sharing the Gospel of Jesus Christ', relevantPages: ['home', 'sermons'] },
+    { no: 50, keyword: "God's love, faith, hope and prayer", relevantPages: ['home', 'about'] },
+  ],
+};
+
+export const PAGE_SEO_BLUEPRINT = {
+  home: {
+    focus_keyword: 'Compassionate Love of Calvary Ministries',
+    meta_title: 'Compassionate Love of Calvary Ministries | Faith & Hope',
+    meta_description: "Compassionate Love of Calvary Ministries is a Christ-centered ministry and church in Chengalpattu, Tamil Nadu sharing God's love, faith, hope, and prayer.",
+    meta_keywords: 'Compassionate Love of Calvary Ministries, Christian ministry in Chengalpattu, Church in Chengalpattu, Christ-centered ministry in Chengalpattu, Christian fellowship in Chengalpattu, Christian ministry near Chengalpattu, Sharing the Gospel of Jesus Christ, God\'s love faith hope and prayer',
+    heroH1: 'Compassionate Love of Calvary Ministries | Faith & Hope',
+    heroSub: 'A Christ-centered Christian ministry in Chengalpattu, Tamil Nadu dedicated to sharing God’s compassionate love, strengthening faith, and bringing living hope to every heart.',
+    faq: `Q: Which church can I visit in Chengalpattu?\nA: You are warmly welcome to visit Compassionate Love of Calvary Ministries in Chengalpattu, Tamil Nadu. We gather for Sunday Morning Worship at 9:00 AM and Evening Fellowship at 6:00 PM.\n\nQ: Where can I find a Christian ministry near me in Chengalpattu?\nA: Compassionate Love of Calvary Ministries is located in Chengalpattu, offering heartfelt prayer fellowship, biblical teachings, and compassionate community outreach.\n\nQ: What are the Core Pillars of Compassionate Love of Calvary Ministries?\nA: Our four foundational pillars are Faith & Prayer, Compassionate Love, Living Hope, and Active Community Service.`,
+  },
+  about: {
+    focus_keyword: 'About Compassionate Love of Calvary Ministries',
+    meta_title: 'About Our Christian Ministry | Compassionate Love of Calvary',
+    meta_description: 'Learn about Compassionate Love of Calvary Ministries in Chengalpattu. Discover our Christ-centered mission, pastoral vision, faith values, and community service.',
+    meta_keywords: 'About Compassionate Love of Calvary Ministries, Faith-based Christian ministry, Ministry sharing God\'s love and hope, Compassionate Christian ministry in Tamil Nadu, Christian spiritual guidance in Chengalpattu, What is God\'s compassionate love, How can I learn more about Jesus Christ',
+    heroH1: 'About Our Christian Ministry | Compassionate Love of Calvary',
+    heroSub: 'Discover the heart, vision, and pastoral leadership behind Compassionate Love of Calvary Ministries in Chengalpattu, Tamil Nadu.',
+    faq: `Q: What is the mission of Compassionate Love of Calvary Ministries?\nA: We are dedicated to sharing God's unconditional love, fostering Christ-centered discipleship, and bringing hope and healing through the Gospel.\n\nQ: What is God's compassionate love?\nA: God's compassionate love is unconditional grace demonstrated through Jesus Christ on Calvary, offering forgiveness, spiritual renewal, and eternal hope to all who believe.\n\nQ: Who leads the ministry?\nA: Compassionate Love of Calvary Ministries is shepherd by dedicated pastoral leadership providing biblical preaching, spiritual guidance, and pastoral prayer.`,
+  },
+  ministries: {
+    focus_keyword: 'Christian Ministries in Chengalpattu',
+    meta_title: 'Christian Ministries in Chengalpattu | Calvary Ministries',
+    meta_description: 'Explore Christ-centered Christian ministries in Chengalpattu and Tamil Nadu. Join our prayer fellowship, youth ministry, women\'s circle, and community charity outreach.',
+    meta_keywords: 'Christian Ministries in Chengalpattu, Christian ministries in Tamil Nadu, Prayer ministry in Chengalpattu, Christian prayer fellowship in Tamil Nadu, Christian worship and fellowship, Gospel ministry in Tamil Nadu, How can prayer help me grow spiritually',
+    heroH1: 'Christian Ministries in Chengalpattu | Compassionate Calvary Outreach',
+    heroSub: 'Putting faith into action through prayer fellowship, evangelism outreach, compassionate charity, and discipleship across Tamil Nadu.',
+    faq: `Q: What ministries are available at Compassionate Love of Calvary?\nA: We offer Sunday Worship, Intercessory Prayer Ministry, Youth Discipleship, Community Charity Outreach, and Gospel Mission Fellowships.\n\nQ: How can I join or volunteer in your ministry?\nA: You can connect with our team through the contact page or join us after our Sunday worship services to get involved in any ministry pathway.\n\nQ: How can prayer help me grow spiritually?\nA: Daily prayer establishes intimate communion with God, builds spiritual endurance, strengthens faith during trials, and aligns our hearts with God's divine purpose.`,
+  },
+  bible: {
+    focus_keyword: 'Bible Teaching Ministry',
+    meta_title: 'Bible Teachings for Faith and Spiritual Growth',
+    meta_description: 'Explore verse-by-verse Bible teachings, Holy Scriptures reading plans, and biblical truth at Compassionate Love of Calvary Ministries in Tamil Nadu.',
+    meta_keywords: 'Bible Teaching Ministry, Biblical teachings for daily life, Bible lessons for spiritual growth, Bible verses about God\'s compassionate love, Where can I learn the Bible online, Where can I find daily Bible verses, Where can I find Bible teachings in Tamil',
+    heroH1: 'Bible Teaching Ministry | Scriptural Truth for Daily Life',
+    heroSub: 'Unchanging truth for a changing world. Explore verse-by-verse scripture analysis, biblical life lessons, and spiritual growth teachings.',
+    faq: `Q: Where can I find daily Bible verses and teachings?\nA: You can explore our Bible section online for daily scriptures, guided reading plans, and verse-by-verse pastoral expositions.\n\nQ: Where can I find Bible teachings in Tamil?\nA: We provide bilingual scriptural insights and messages in Tamil and English to help Tamil Nadu families grow deeply in God's Word.\n\nQ: Why is biblical teaching essential for spiritual growth?\nA: The Bible is God’s inspired Word—a lamp to our feet and a light to our path—providing divine wisdom, encouragement, and moral guidance.`,
+  },
+  study: {
+    focus_keyword: 'Christian Bible Study',
+    meta_title: 'Christian Bible Study | Learn and Grow in Faith',
+    meta_description: 'Engage in Christian Bible study with Compassionate Love of Calvary Ministries. Deepen your faith with beginner and advanced scripture study resources.',
+    meta_keywords: 'Christian Bible Study, Bible study resources for beginners, Bible study fellowship in Chengalpattu, How to grow in Christian faith, How can I start studying the Bible, Bible teaching in Chengalpattu',
+    heroH1: 'Christian Bible Study | Learn, Understand and Grow in Faith',
+    heroSub: 'Practical, in-depth Christian Bible studies designed for beginners and seasoned believers to cultivate a vibrant walk with Jesus Christ.',
+    faq: `Q: How can I start studying the Bible as a beginner?\nA: Start with the Gospels (such as the Gospel of John), read with prayer asking the Holy Spirit for insight, and use our free structured study guides.\n\nQ: Does the church offer Bible study fellowship in Chengalpattu?\nA: Yes, we host weekly in-person and online Bible study fellowships covering books of the Old and New Testaments.\n\nQ: Are study guides and resources free?\nA: All study questions, notes, and outlines are 100% free for all seekers and believers.`,
+  },
+  devotional: {
+    focus_keyword: 'Christian Devotionals for Daily Faith',
+    meta_title: 'Daily Christian Devotionals for Faith and Spiritual Growth',
+    meta_description: 'Read inspiring daily Christian devotionals for spiritual encouragement, prayer habits, and faith renewal from Compassionate Love of Calvary Ministries.',
+    meta_keywords: 'Christian Devotionals for Daily Faith, Christian devotional, Daily Christian devotional for spiritual growth, How to develop a daily prayer habit, Where can I find Christian devotionals for today, Christian ministry for spiritual encouragement',
+    heroH1: 'Daily Christian Devotionals | Nourishing Faith & Morning Prayer',
+    heroSub: 'Start each day refreshed in God’s presence with daily devotionals, scripture meditation, and pastoral prayers for living hope.',
+    faq: `Q: Where can I find Christian devotionals for today?\nA: Read our daily devotional post every morning on our website, complete with a focus scripture, devotional reflection, and closing prayer.\n\nQ: How can I develop a daily prayer habit?\nA: Set aside a dedicated quiet time each morning, start with thanksgiving, read a devotional scripture, and speak honestly with God about your daily needs.\n\nQ: Can I receive daily devotionals on my phone?\nA: Yes, bookmark loveofcalvary.org/devotional or subscribe to our community messages for daily spiritual uplift.`,
+  },
+  sermons: {
+    focus_keyword: 'Christian Sermons',
+    meta_title: 'Christian Sermons and Biblical Teachings',
+    meta_description: 'Watch and listen to uplifting Christian sermons, Sunday Gospel messages, and teachings on God’s grace and love by Compassionate Love of Calvary Ministries.',
+    meta_keywords: 'Christian Sermons, Where can I find Christian sermons online, Understanding God\'s grace in Christianity, Christian teachings about love and forgiveness, How to understand God\'s grace, What does the Bible teach about forgiveness',
+    heroH1: 'Christian Sermons & Gospel Teachings | Watch & Listen Online',
+    heroSub: 'Biblical preaching filled with grace, truth, and Holy Spirit power. Watch full Sunday sermons, sermon summaries, and message archives.',
+    faq: `Q: Where can I watch Christian sermons online?\nA: You can watch our Sunday Gospel sermons on our official Sermons page and on our YouTube channel anytime.\n\nQ: What does the Bible teach about God’s grace and forgiveness?\nA: The Bible teaches that God\'s grace is a free gift received through faith in Jesus Christ, and His forgiveness cleanses us from all unrighteousness.\n\nQ: Can I download sermon notes?\nA: Yes, each sermon comes with core scripture references and key takeaway points for your personal study.`,
+  },
+  contact: {
+    focus_keyword: 'Contact Compassionate Love of Calvary Ministries',
+    meta_title: 'Contact Calvary Ministries | Prayer and Ministry Enquiries',
+    meta_description: 'Contact Compassionate Love of Calvary Ministries in Chengalpattu, Tamil Nadu. Submit prayer requests, get church location, service timings, and pastoral support.',
+    meta_keywords: 'Contact Compassionate Love of Calvary Ministries, Christian prayer and spiritual guidance, Prayer ministry in Chengalpattu, Christian ministry near Chengalpattu, Where can I find a Christian ministry near me, Which church can I visit in Chengalpattu',
+    heroH1: 'Contact Us & Prayer Requests | Calvary Ministries Chengalpattu',
+    heroSub: 'We are here to pray with you, answer your spiritual questions, and welcome you into our loving church family in Chengalpattu.',
+    faq: `Q: Where is Compassionate Love of Calvary Ministries located?\nA: We are located in Chengalpattu, Tamil Nadu 603001, India. Full directions and maps are provided on this page.\n\nQ: How do I submit an urgent prayer request?\nA: You can submit your prayer request using the online form on this page or contact our prayer line directly at +91-9876543210.\n\nQ: Can I speak with the Pastor for pastoral counseling?\nA: Yes, our pastoral team provides spiritual guidance and biblical counseling for individuals and families.`,
+  },
+  events: {
+    focus_keyword: 'Christian Worship and Fellowship Events',
+    meta_title: 'Church Events & Worship Fellowship | Calvary Ministries',
+    meta_description: 'Join upcoming church events, special worship nights, prayer conferences, and youth fellowship at Compassionate Love of Calvary Ministries in Chengalpattu.',
+    meta_keywords: 'Christian Worship and Fellowship Events, Christian prayer fellowship in Tamil Nadu, Christian worship and fellowship, worship prayer assembly church events, Sunday worship Chengalpattu',
+    heroH1: 'Upcoming Church Events & Worship Fellowship Gatherings',
+    heroSub: 'Join us for inspiring worship nights, community prayer vigils, seasonal celebrations, and special fellowship conferences.',
+    faq: `Q: When are the regular weekly services?\nA: Sunday Worship Service at 9:00 AM, Sunday Evening Fellowship at 6:00 PM, and Midweek Prayer on Wednesdays at 6:30 PM.\n\nQ: Are visitors and new families welcome at church events?\nA: Absolutely! All events, worship services, and community gatherings are open to everyone.`,
+  },
+  blog: {
+    focus_keyword: 'Ministry for Faith and Spiritual Growth',
+    meta_title: 'Faith, Hope & Spiritual Growth Articles | Calvary Ministries',
+    meta_description: 'Read Christian articles, spiritual encouragement, biblical life guides, and ministry testimonies from Compassionate Love of Calvary Ministries.',
+    meta_keywords: 'Ministry for Faith and Spiritual Growth, Biblical teachings for daily life, How to grow in Christian faith, Christian teachings about love and forgiveness, Christian living articles spiritual growth',
+    heroH1: 'Ministry Articles & Spiritual Growth Insights',
+    heroSub: 'Biblical wisdom, testimonies, and practical articles to strengthen your walk with Christ in today’s world.',
+    faq: `Q: How often are new articles published?\nA: We publish weekly articles covering Christian living, biblical doctrines, prayer life, and inspirational testimonies.\n\nQ: Can I share these articles with my prayer group or family?\nA: Yes, all articles include easy sharing links for WhatsApp, Facebook, and social media to encourage others.`,
+  },
+  media: {
+    focus_keyword: 'Gospel Ministry Worship & Media',
+    meta_title: 'Gospel Worship & Ministry Media Gallery | Calvary Ministries',
+    meta_description: 'Browse photos, worship videos, choir recordings, and ministry outreach highlights from Compassionate Love of Calvary Ministries in Chengalpattu.',
+    meta_keywords: 'Gospel Ministry Worship & Media, Gospel ministry in Tamil Nadu, Christian worship and fellowship, ministry worship photos video gallery, Calvary church photos',
+    heroH1: 'Worship, Fellowship & Outreach Media Gallery',
+    heroSub: 'Capturing moments of heartfelt worship, joyful fellowship, and compassionate charity service across our community.',
+    faq: `Q: Can I watch video recordings of previous worship services?\nA: Yes, full worship recordings and video highlights are available in our media section and on YouTube.\n\nQ: How can I access high-resolution photos of ministry events?\nA: You can view and download outreach and celebration photos directly from our media gallery.`,
+  }
+};
 
 const slugify = (value) => value
   .normalize('NFD')
@@ -328,6 +491,11 @@ export const AdminPageSEOEditor = () => {
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState({ type: '', text: '' });
   const [activeSectionId, setActiveSectionId] = useState('section-1');
+  
+  // 50-Keyword Explorer UI State
+  const [isKeywordExplorerOpen, setIsKeywordExplorerOpen] = useState(false);
+  const [keywordCategoryFilter, setKeywordCategoryFilter] = useState('all');
+  const [keywordSearchText, setKeywordSearchText] = useState('');
 
   // Media Picker modal
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
@@ -488,14 +656,15 @@ export const AdminPageSEOEditor = () => {
     }
   };
 
-  const handleOptimizeForPageOne = () => {
-    const kw = (seoData.focus_keyword || currentPageObj.defaultKw || 'Compassionate Love of Calvary Ministries').trim();
-    const capitalizedKw = kw.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-    const newTitle = `${capitalizedKw} | Compassionate Love of Calvary Ministries`;
-    const newDesc = `Discover ${capitalizedKw} at Compassionate Love of Calvary Ministries in Chengalpattu, Tamil Nadu. Rooted in prayer, Bible truth, and Christ-centered worship.`;
-    const newKeywords = `${kw}, Calvary ministries, church in chengalpattu, christian prayer tamil nadu, holy scriptures bible, gospel faith fellowship`;
-    const newHeroH1 = sections.hero?.h1 || `${capitalizedKw} — Living Hope & Faith`;
-    const newCanonical = `https://www.loveofcalvary.org/${selectedPage === 'home' ? '' : selectedPage}`;
+  const handleOptimizeForPageOne = (pageKey = selectedPage) => {
+    const blueprint = PAGE_SEO_BLUEPRINT[pageKey] || PAGE_SEO_BLUEPRINT.home;
+    const kw = blueprint.focus_keyword;
+    const newTitle = blueprint.meta_title;
+    const newDesc = blueprint.meta_description;
+    const newKeywords = blueprint.meta_keywords;
+    const newHeroH1 = blueprint.heroH1;
+    const newHeroSub = blueprint.heroSub;
+    const newCanonical = `https://www.loveofcalvary.org/${pageKey === 'home' ? '' : pageKey}`;
 
     const updatedSeo = {
       ...seoData,
@@ -513,18 +682,64 @@ export const AdminPageSEOEditor = () => {
       hero: {
         ...sections.hero,
         h1: newHeroH1,
+        subheading: newHeroSub,
+      },
+      faq: {
+        raw: blueprint.faq || sections.faq?.raw || '',
       }
     };
 
     setSeoData(updatedSeo);
     setSections(updatedSections);
-    const newRawTags = generateRawHtmlTags(updatedSeo, newHeroH1, updatedSections.hero?.subheading, selectedPage);
+    const newRawTags = generateRawHtmlTags(updatedSeo, newHeroH1, newHeroSub, pageKey);
     setRawHtmlCode(newRawTags);
     setFeedback({
       type: 'success',
-      text: `⚡ Google Page 1 Optimization Applied! "${kw}" is now synchronized across Title, H1, Meta Description, Keywords, and Structured Data.`
+      text: `⭐ 50-Keyword Blueprint Applied for ${currentPageObj.name}! Target: "${kw}" synchronized across Title, H1, Meta Description, Keywords, FAQs & Schema.`
     });
     setTimeout(() => setFeedback({ type: '', text: '' }), 5000);
+  };
+
+  const handleInsertKeyword = (kw) => {
+    setSeoData(prev => {
+      const existing = (prev.meta_keywords || '').split(',').map(s => s.trim()).filter(Boolean);
+      if (existing.includes(kw)) {
+        setFeedback({ type: 'info', text: `"${kw}" is already in Meta Keywords.` });
+        setTimeout(() => setFeedback({ type: '', text: '' }), 2500);
+        return prev;
+      }
+      const updatedKeywords = [...existing, kw].join(', ');
+      const updated = { ...prev, meta_keywords: updatedKeywords };
+      setRawHtmlCode(generateRawHtmlTags(updated, sections.hero?.h1, sections.hero?.subheading, selectedPage));
+      setFeedback({ type: 'success', text: `Added "${kw}" to Meta Keywords!` });
+      setTimeout(() => setFeedback({ type: '', text: '' }), 2500);
+      return updated;
+    });
+  };
+
+  const handleSetFocusKeyword = (kw) => {
+    setSeoData(prev => {
+      const updated = { ...prev, focus_keyword: kw };
+      setRawHtmlCode(generateRawHtmlTags(updated, sections.hero?.h1, sections.hero?.subheading, selectedPage));
+      setFeedback({ type: 'success', text: `Set "${kw}" as Primary Focus Keyword!` });
+      setTimeout(() => setFeedback({ type: '', text: '' }), 2500);
+      return updated;
+    });
+  };
+
+  const handleInsertFaqQuestion = (question) => {
+    setSections(prev => {
+      const currentFaq = prev.faq?.raw || '';
+      const defaultAnswer = `Compassionate Love of Calvary Ministries in Chengalpattu warmly welcomes you. Join our worship, daily prayer intercession, and Bible study fellowship.`;
+      const newBlock = `Q: ${question}\nA: ${defaultAnswer}`;
+      const updatedFaq = currentFaq ? `${currentFaq}\n\n${newBlock}` : newBlock;
+      setFeedback({ type: 'success', text: `Added question "${question}" to FAQs!` });
+      setTimeout(() => setFeedback({ type: '', text: '' }), 2500);
+      return {
+        ...prev,
+        faq: { raw: updatedFaq }
+      };
+    });
   };
 
   const handleSave = async () => {
@@ -1881,7 +2096,7 @@ export const AdminPageSEOEditor = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                 <button
                   type="button"
-                  onClick={handleOptimizeForPageOne}
+                  onClick={() => handleOptimizeForPageOne(selectedPage)}
                   style={{
                     padding: '0.28rem 0.65rem',
                     background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
@@ -1896,9 +2111,31 @@ export const AdminPageSEOEditor = () => {
                     gap: '4px',
                     boxShadow: '0 2px 6px rgba(16,185,129,0.3)'
                   }}
-                  title="Automatically synchronize and optimize Title, H1, Description, Keywords, and Structured Data for Google Page 1 ranking"
+                  title="Automatically synchronize and optimize Title, H1, Description, Keywords, FAQs, and Schema using the 50 SEO Keywords Blueprint for Page 1 ranking"
                 >
-                  <Sparkles size={12} /> ⚡ Optimize for Page 1 Ranking
+                  <Sparkles size={12} /> ⭐ Apply 50-Keyword Blueprint ({currentPageObj.name})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsKeywordExplorerOpen(prev => !prev)}
+                  style={{
+                    padding: '0.28rem 0.65rem',
+                    background: isKeywordExplorerOpen ? '#D97706' : 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+                    border: 'none',
+                    borderRadius: '5px',
+                    color: '#FFFFFF',
+                    fontSize: '0.74rem',
+                    cursor: 'pointer',
+                    fontWeight: 800,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    boxShadow: '0 2px 6px rgba(245,158,11,0.3)'
+                  }}
+                  title="Explore all 50 SEO Keywords, Long-tail queries, and Google Intent Questions"
+                >
+                  <Tag size={12} /> {isKeywordExplorerOpen ? 'Hide 50 Keywords' : '50 Keywords Matrix (Explore)'}
                 </button>
 
                 <button
@@ -1947,6 +2184,178 @@ export const AdminPageSEOEditor = () => {
                 </button>
               </div>
             </div>
+
+            {/* 50 SEO Keywords Explorer & Google Intent Assistant */}
+            {isKeywordExplorerOpen && (
+              <div style={{
+                marginBottom: '1rem',
+                background: '#0B132B',
+                border: '1px solid #F59E0B',
+                borderRadius: '8px',
+                padding: '1rem',
+                boxShadow: '0 4px 16px rgba(245,158,11,0.15)'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Tag size={16} color="#FBBF24" />
+                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#FBBF24' }}>
+                      50 SEO Keywords &amp; Google Search Intent Matrix
+                    </span>
+                    <span style={{ fontSize: '0.7rem', color: '#94A3B8' }}>
+                      Click any keyword to add to this page's meta keywords or focus keyword
+                    </span>
+                  </div>
+
+                  <input
+                    type="text"
+                    value={keywordSearchText}
+                    onChange={(e) => setKeywordSearchText(e.target.value)}
+                    placeholder="Search 50 keywords..."
+                    style={{
+                      padding: '0.25rem 0.6rem',
+                      background: '#111C33',
+                      border: '1px solid #334155',
+                      borderRadius: '5px',
+                      color: '#FFFFFF',
+                      fontSize: '0.75rem',
+                      width: '180px'
+                    }}
+                  />
+                </div>
+
+                {/* Category Pills */}
+                <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
+                  {[
+                    { id: 'all', label: 'All 50 Keywords' },
+                    { id: 'primary', label: '1. Primary (1–10)' },
+                    { id: 'longTail', label: '2. Long-Tail (11–25)' },
+                    { id: 'intent', label: '3. Google Intent Questions (26–40)' },
+                    { id: 'local', label: '4. Local SEO (41–50)' },
+                  ].map(tab => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setKeywordCategoryFilter(tab.id)}
+                      style={{
+                        padding: '0.22rem 0.55rem',
+                        borderRadius: '4px',
+                        border: '1px solid',
+                        borderColor: keywordCategoryFilter === tab.id ? '#F59E0B' : '#1E2E4E',
+                        background: keywordCategoryFilter === tab.id ? 'rgba(245,158,11,0.2)' : '#111C33',
+                        color: keywordCategoryFilter === tab.id ? '#FBBF24' : '#94A3B8',
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Keyword Grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '0.5rem', maxHeight: '260px', overflowY: 'auto', paddingRight: '4px' }}>
+                  {(() => {
+                    let list = [];
+                    if (keywordCategoryFilter === 'all' || keywordCategoryFilter === 'primary') {
+                      list.push(...SEO_KEYWORDS_50_DATABASE.primary.map(k => ({ ...k, type: 'primary', text: k.keyword })));
+                    }
+                    if (keywordCategoryFilter === 'all' || keywordCategoryFilter === 'longTail') {
+                      list.push(...SEO_KEYWORDS_50_DATABASE.longTail.map(k => ({ ...k, type: 'longTail', text: k.keyword })));
+                    }
+                    if (keywordCategoryFilter === 'all' || keywordCategoryFilter === 'intent') {
+                      list.push(...SEO_KEYWORDS_50_DATABASE.userSearchingIntent.map(k => ({ ...k, type: 'intent', text: k.question })));
+                    }
+                    if (keywordCategoryFilter === 'all' || keywordCategoryFilter === 'local') {
+                      list.push(...SEO_KEYWORDS_50_DATABASE.localSeo.map(k => ({ ...k, type: 'local', text: k.keyword })));
+                    }
+
+                    if (keywordSearchText.trim()) {
+                      const q = keywordSearchText.toLowerCase();
+                      list = list.filter(k => k.text.toLowerCase().includes(q));
+                    }
+
+                    return list.map(item => (
+                      <div
+                        key={item.no}
+                        style={{
+                          background: '#111C33',
+                          border: '1px solid #1E2E4E',
+                          borderRadius: '6px',
+                          padding: '0.5rem 0.65rem',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.35rem'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#60A5FA' }}>
+                            #{item.no} {item.targetPage ? `[Target: ${item.targetPage}]` : ''}
+                          </span>
+                          <span style={{
+                            fontSize: '0.62rem',
+                            fontWeight: 700,
+                            padding: '1px 5px',
+                            borderRadius: '3px',
+                            background: item.type === 'primary' ? 'rgba(37,99,235,0.2)' : item.type === 'intent' ? 'rgba(16,185,129,0.2)' : 'rgba(245,158,11,0.2)',
+                            color: item.type === 'primary' ? '#93C5FD' : item.type === 'intent' ? '#6EE7B7' : '#FCD34D'
+                          }}>
+                            {item.type === 'primary' ? 'Primary' : item.type === 'intent' ? 'Google Intent' : item.type === 'local' ? 'Local SEO' : 'Long-Tail'}
+                          </span>
+                        </div>
+
+                        <div style={{ fontSize: '0.76rem', color: '#FFFFFF', fontWeight: 600, lineHeight: 1.3 }}>
+                          {item.text}
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '0.3rem', marginTop: '0.2rem' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleInsertKeyword(item.text)}
+                            style={{ padding: '0.2rem 0.45rem', background: '#1E293B', border: '1px solid #334155', borderRadius: '4px', color: '#93C5FD', fontSize: '0.65rem', cursor: 'pointer', fontWeight: 700 }}
+                            title="Add to page Meta Keywords"
+                          >
+                            + Keywords
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleSetFocusKeyword(item.text)}
+                            style={{ padding: '0.2rem 0.45rem', background: '#1E293B', border: '1px solid #334155', borderRadius: '4px', color: '#34D399', fontSize: '0.65rem', cursor: 'pointer', fontWeight: 700 }}
+                            title="Set as Focus Keyword"
+                          >
+                            Set Focus
+                          </button>
+                          {item.type === 'intent' && (
+                            <button
+                              type="button"
+                              onClick={() => handleInsertFaqQuestion(item.text)}
+                              style={{ padding: '0.2rem 0.45rem', background: '#1E293B', border: '1px solid #334155', borderRadius: '4px', color: '#FBBF24', fontSize: '0.65rem', cursor: 'pointer', fontWeight: 700 }}
+                              title="Add to FAQ Section"
+                            >
+                              + Add FAQ
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              try {
+                                await navigator.clipboard.writeText(item.text);
+                                setFeedback({ type: 'success', text: `Copied: "${item.text}"` });
+                                setTimeout(() => setFeedback({ type: '', text: '' }), 2000);
+                              } catch {}
+                            }}
+                            style={{ padding: '0.2rem 0.45rem', background: '#1E293B', border: '1px solid #334155', borderRadius: '4px', color: '#CBD5E1', fontSize: '0.65rem', cursor: 'pointer' }}
+                            title="Copy to clipboard"
+                          >
+                            Copy
+                          </button>
+                        </div>
+                      </div>
+                    ));
+                  })()}
+                </div>
+              </div>
+            )}
 
             {/* Mode 1: Raw HTML Code Editor */}
             {isRawHtmlEditor && (
