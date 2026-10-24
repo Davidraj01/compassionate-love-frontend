@@ -2,6 +2,24 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { api, getMediaUrl } from '../../services/api';
 import { ROUTES } from '../../routes/routes';
 import { convertWordPressToHtml } from '../../utils/wpToHtmlConverter';
+import {
+  SITE_BASE_URL,
+  BLOG_BASE_URL,
+  getActiveSiteOrigin,
+  KEY_FEATURES_PRESET,
+  SITE_PAGE_PRESETS,
+  isValidLinkUrl,
+  formatLinkUrl,
+  formatBlogUrl,
+  cleanBlogSlug,
+  generateBlogSlugFromContent,
+  generateBlogUrl,
+  isInternalOrMinistryUrl,
+  findRelatedBlogs,
+  buildCategorizedPresets,
+  copyLinkToClipboard,
+  autoLinkContentText
+} from '../../utils/linkAutoGenerator';
 import { 
   Globe, Search, Plus, Edit2, Trash2, Eye, 
   CheckCircle2, AlertCircle, Loader2, Sparkles, 
@@ -9,7 +27,7 @@ import {
   Check, X, FileText, BarChart2, ShieldCheck, 
   Image as ImageIcon, RefreshCw, Smartphone, Monitor,
   Sliders, Link as LinkIcon, HelpCircle, ArrowRight,
-  Bold, Italic, Underline, Strikethrough, List, ListOrdered, Quote, Minus
+  Bold, Italic, Underline, Strikethrough, List, ListOrdered, Quote, Minus, Copy
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -35,7 +53,10 @@ export const AdminSEOEditor = () => {
   const [activeEditorTab, setActiveEditorTab] = useState('content'); // 'content', 'seo', 'preview'
   const [serpDevice, setSerpDevice] = useState('desktop'); // 'desktop', 'mobile'
   const [internalLinkUrl, setInternalLinkUrl] = useState('/#key-features');
+  const [linkAnchorText, setLinkAnchorText] = useState('Key Features');
+  const [useFullUrl, setUseFullUrl] = useState(true);
   const [contentColor, setContentColor] = useState('#0f172a');
+  const [copiedLinkKey, setCopiedLinkKey] = useState(null);
   
   // Delete Modal State
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
@@ -55,7 +76,7 @@ export const AdminSEOEditor = () => {
     read_time: '5 min read',
     is_published: true,
     is_featured: false,
-    is_hidden_from_feed: true,
+    is_hidden_from_feed: false,
     meta_title: '',
     meta_description: '',
     meta_keywords: '',
@@ -94,27 +115,20 @@ export const AdminSEOEditor = () => {
   };
 
   // Helper to slugify title
-  const slugify = (text) => {
-    return text
-      .toString()
-      .toLowerCase()
-      .trim()
-      .replace(/[\s\W-]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-  };
+  const slugify = (text) => cleanBlogSlug(text);
 
   const handleTitleChange = (val) => {
     setFormData(prev => {
       const updated = { ...prev, title: val };
-      const currentGeneratedSlug = slugify(prev.title);
-      const newSlug = slugify(val);
+      const currentGeneratedSlug = cleanBlogSlug(prev.title);
+      const newSlug = cleanBlogSlug(val);
       
       // Keep generated URLs in sync while editing, but preserve custom slugs.
       if (!prev.slug || prev.slug === currentGeneratedSlug) {
         updated.slug = newSlug;
-        // Auto-generate canonical SEO URL
-        if (!prev.canonical_url || prev.canonical_url === `https://www.loveofcalvary.org/blog/${prev.slug}`) {
-          updated.canonical_url = newSlug ? `https://www.loveofcalvary.org/blog/${newSlug}` : '';
+        // Auto-generate canonical SEO URL in format https://blog.loveofcalavary.org/:slug/
+        if (!prev.canonical_url || prev.canonical_url.includes('loveofcalavary.org') || prev.canonical_url.includes('loveofcalvary.org')) {
+          updated.canonical_url = formatBlogUrl(newSlug, true);
         }
       }
       
@@ -127,13 +141,11 @@ export const AdminSEOEditor = () => {
   };
 
   const handleSlugChange = (val) => {
-    const cleanSlug = slugify(val);
+    const cleanSlug = cleanBlogSlug(val);
     setFormData(prev => ({
       ...prev,
       slug: cleanSlug,
-      canonical_url: (!prev.canonical_url || prev.canonical_url === `https://www.loveofcalvary.org/blog/${prev.slug}`)
-        ? (cleanSlug ? `https://www.loveofcalvary.org/blog/${cleanSlug}` : '')
-        : prev.canonical_url
+      canonical_url: formatBlogUrl(cleanSlug, true)
     }));
   };
 
@@ -164,7 +176,7 @@ export const AdminSEOEditor = () => {
       read_time: '5 min read',
       is_published: true,
       is_featured: false,
-      is_hidden_from_feed: true,
+      is_hidden_from_feed: false,
       meta_title: '',
       meta_description: '',
       meta_keywords: 'faith, prayer, Calvary ministries, bible encouragement',
@@ -196,7 +208,7 @@ export const AdminSEOEditor = () => {
       read_time: blog.read_time || '5 min read',
       is_published: blog.is_published ?? true,
       is_featured: blog.is_featured ?? false,
-      is_hidden_from_feed: blog.is_hidden_from_feed ?? true,
+      is_hidden_from_feed: blog.is_hidden_from_feed ?? false,
       meta_title: blog.meta_title || '',
       meta_description: blog.meta_description || '',
       meta_keywords: blog.meta_keywords || '',
@@ -272,13 +284,148 @@ export const AdminSEOEditor = () => {
     }, 50);
   };
 
-  const insertInternalLink = () => {
-    const target = internalLinkUrl.trim();
-    if (!/^\/(?!\/)[A-Za-z0-9/_#?&=.%+-]*$/.test(target)) {
-      showToast('error', 'Enter a valid internal path, such as /about or /#key-features.');
+  const handleAutoGenerateSlugFromContent = () => {
+    const generatedSlug = generateBlogSlugFromContent({
+      title: formData.title,
+      focusKeyword: formData.focus_keyword,
+      content: formData.content,
+      excerpt: formData.excerpt,
+      category: formData.category,
+      tags: formData.tags,
+      metaKeywords: formData.meta_keywords,
+    });
+
+    if (!generatedSlug) {
+      showToast('error', 'Please provide an article title, focus keyword, or content to generate a URL.');
       return;
     }
-    insertFormatting('[', `](${target})`, 'Key Features');
+
+    const fullUrl = formatBlogUrl(generatedSlug, true);
+    setFormData(prev => ({
+      ...prev,
+      slug: generatedSlug,
+      canonical_url: fullUrl,
+    }));
+    showToast('success', `⚡ Generated blog URL: ${fullUrl}`);
+  };
+
+  const handleAutoGenerateRelatedBlog = () => {
+    const related = findRelatedBlogs(formData.content, formData.title, blogs, formData.slug);
+    if (related.length > 0 && related[0].relevanceScore > 0) {
+      const top = related[0];
+      const blogUrl = formatBlogUrl(top.slug, useFullUrl);
+      setInternalLinkUrl(blogUrl);
+      setLinkAnchorText(top.title || top.slug);
+      const reason = top.matchedKeywords?.slice(0, 3).join(', ');
+      showToast('success', `🎯 Auto-matched related blog: "${top.title}"${reason ? ` (${reason})` : ''}`);
+    } else if (blogs.length > 0) {
+      const fallback = blogs.find(b => b.slug !== formData.slug) || blogs[0];
+      const blogUrl = formatBlogUrl(fallback.slug, useFullUrl);
+      setInternalLinkUrl(blogUrl);
+      setLinkAnchorText(fallback.title || fallback.slug);
+      showToast('info', `📰 Selected blog URL: "${fallback.title}"`);
+    } else {
+      showToast('error', 'No other blog articles available to link to.');
+    }
+  };
+
+  const handleCopyLinkManually = async (format = 'html') => {
+    const targetUrl = internalLinkUrl.trim();
+    if (!targetUrl || !isValidLinkUrl(targetUrl)) {
+      showToast('error', 'Please enter or select a valid URL first to copy.');
+      return;
+    }
+    const linkText = linkAnchorText.trim() || 'Key Features';
+    const isExternal = !isInternalOrMinistryUrl(targetUrl);
+    
+    let textToCopy = '';
+    let toastMsg = '';
+    if (format === 'slug') {
+      textToCopy = cleanBlogSlug(targetUrl);
+      toastMsg = `🏷️ Copied Slug: ${textToCopy}`;
+    } else if (format === 'url') {
+      textToCopy = targetUrl;
+      toastMsg = `📋 Copied URL: ${textToCopy}`;
+    } else {
+      textToCopy = `<a href="${targetUrl}"${isExternal ? ' target="_blank" rel="noopener noreferrer"' : ''}>${linkText}</a>`;
+      toastMsg = `📋 Copied HTML: ${textToCopy}`;
+    }
+
+    const success = await copyLinkToClipboard(textToCopy);
+    if (success) {
+      setCopiedLinkKey(`blog_${format}`);
+      showToast('success', toastMsg);
+      setTimeout(() => setCopiedLinkKey(null), 2500);
+    } else {
+      showToast('error', 'Failed to copy to clipboard.');
+    }
+  };
+
+  const categorizedLinkPresets = useMemo(() => {
+    return buildCategorizedPresets(blogs, formData.slug, useFullUrl, formData.content, formData.title);
+  }, [blogs, formData.slug, useFullUrl, formData.content, formData.title]);
+
+  const handleSelectPreset = (val) => {
+    if (!val || val === 'custom') return;
+    const allPresets = [
+      ...categorizedLinkPresets.keyFeatures,
+      ...categorizedLinkPresets.sitePages,
+      ...categorizedLinkPresets.blogPosts,
+    ];
+    const found = allPresets.find(p => p.url === val || p.formattedUrl === val);
+    if (found) {
+      setInternalLinkUrl(found.formattedUrl);
+      setLinkAnchorText(found.anchor);
+    } else {
+      setInternalLinkUrl(formatLinkUrl(val, useFullUrl));
+    }
+  };
+
+  const handleToggleFullUrl = (checked) => {
+    setUseFullUrl(checked);
+    setInternalLinkUrl(prev => formatLinkUrl(prev, checked));
+  };
+
+  const handleAutoLinkArticleContent = () => {
+    const currentValue = formData.content || '';
+    if (!currentValue.trim()) {
+      showToast('error', 'Article content is currently empty.');
+      return;
+    }
+    const { updated, count } = autoLinkContentText(currentValue, {
+      blogs,
+      useFullDomain: useFullUrl,
+      currentSlug: formData.slug,
+    });
+    if (count > 0) {
+      setFormData(prev => ({ ...prev, content: updated }));
+      showToast('success', `✨ Auto-generated ${count} link(s) for blog & key features!`);
+    } else {
+      showToast('info', 'All key features, pages, and blog titles are already linked in this article.');
+    }
+  };
+
+  const insertInternalLink = () => {
+    const target = internalLinkUrl.trim();
+    if (!isValidLinkUrl(target)) {
+      showToast('error', 'Enter a valid URL or path, such as /about, /#key-features, or https://blog.loveofcalavary.org/.../');
+      return;
+    }
+    const textarea = document.getElementById('blog-content-textarea');
+    const content = formData.content || '';
+    const start = textarea?.selectionStart ?? content.length;
+    const end = textarea?.selectionEnd ?? content.length;
+    const selected = content.substring(start, end);
+    const linkText = linkAnchorText.trim() || selected.trim() || 'Key Features';
+    const isExternal = !isInternalOrMinistryUrl(target);
+    const replacement = `<a href="${target}"${isExternal ? ' target="_blank" rel="noopener noreferrer"' : ''}>${linkText}</a>`;
+    const nextContent = content.substring(0, start) + replacement + content.substring(end);
+    setFormData(prev => ({ ...prev, content: nextContent }));
+    window.setTimeout(() => {
+      if (!textarea) return;
+      textarea.focus();
+      textarea.setSelectionRange(start + replacement.length, start + replacement.length);
+    }, 50);
   };
 
   // Real-time SEO Scoring & Checklist Engine
@@ -381,8 +528,8 @@ export const AdminSEOEditor = () => {
 
     setSaving(true);
     try {
-      const autoSlug = slugify(formData.slug || formData.title || 'article');
-      const autoCanonical = formData.canonical_url || `https://www.loveofcalvary.org/blog/${autoSlug}`;
+      const autoSlug = cleanBlogSlug(formData.slug || formData.title || 'article');
+      const autoCanonical = formData.canonical_url || formatBlogUrl(autoSlug, true);
 
       const payload = new FormData();
       payload.append('title', formData.title.trim());
@@ -726,6 +873,29 @@ export const AdminSEOEditor = () => {
                             <strong style={{ color: '#0F172A', fontSize: '0.95rem', display: 'block' }}>
                               {blog.title}
                             </strong>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem', fontSize: '0.76rem' }}>
+                              <a
+                                href={formatBlogUrl(blog.slug, true)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ color: '#2563EB', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.2rem', fontWeight: 600 }}
+                                title="Open active blog article"
+                              >
+                                <ExternalLink size={11} /> {formatBlogUrl(blog.slug, false)}
+                              </a>
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  const fullUrl = formatBlogUrl(blog.slug, true);
+                                  const ok = await copyLinkToClipboard(fullUrl);
+                                  if (ok) showToast('success', `📋 Copied active blog URL: ${fullUrl}`);
+                                }}
+                                style={{ border: 'none', background: 'transparent', color: '#64748B', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}
+                                title="Copy full active link to clipboard"
+                              >
+                                <Copy size={11} /> Copy
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </td>
@@ -974,13 +1144,13 @@ export const AdminSEOEditor = () => {
                   <span>Publish to Web (Indexed)</span>
                 </label>
 
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', color: '#64748B' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', color: '#0F172A' }}>
                   <input
                     type="checkbox"
-                    checked={formData.is_hidden_from_feed}
-                    onChange={(e) => setFormData(prev => ({ ...prev, is_hidden_from_feed: e.target.checked }))}
+                    checked={!formData.is_hidden_from_feed}
+                    onChange={(e) => setFormData(prev => ({ ...prev, is_hidden_from_feed: !e.target.checked }))}
                   />
-                  <span>Hidden from Blog Feed Cards</span>
+                  <span>Show on Front Page &amp; Blog Feed</span>
                 </label>
               </div>
             </div>
@@ -1011,6 +1181,141 @@ export const AdminSEOEditor = () => {
                         fontWeight: 600
                       }}
                     />
+                  </div>
+
+                  {/* Article Permanent URL / Slug */}
+                  <div style={{ background: '#F8FAFC', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0F172A' }}>
+                        Article Permanent URL (Slug)
+                      </label>
+                      <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
+                        <button
+                          type="button"
+                          onClick={handleAutoGenerateSlugFromContent}
+                          style={{
+                            border: 'none',
+                            background: 'transparent',
+                            color: '#2563EB',
+                            fontSize: '0.78rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.2rem',
+                            padding: 0
+                          }}
+                          title="Auto-generate clean SEO URL slug from main keyword, internal topic keyword, and article content"
+                        >
+                          <Sparkles size={12} /> Auto-Generate URL
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const fullUrl = formatBlogUrl(formData.slug || formData.title, true);
+                            window.open(fullUrl, '_blank');
+                          }}
+                          style={{
+                            border: 'none',
+                            background: 'transparent',
+                            color: '#2563EB',
+                            fontSize: '0.78rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.2rem',
+                            padding: 0
+                          }}
+                          title="Open and view active blog link in new browser tab"
+                        >
+                          <ExternalLink size={12} /> Open Active Link
+                        </button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const fullUrl = formatBlogUrl(formData.slug || formData.title, true);
+                            const ok = await copyLinkToClipboard(fullUrl);
+                            if (ok) showToast('success', `📋 Copied Active Blog URL: ${fullUrl}`);
+                          }}
+                          style={{
+                            border: 'none',
+                            background: 'transparent',
+                            color: '#059669',
+                            fontSize: '0.78rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.2rem',
+                            padding: 0
+                          }}
+                          title="Copy full active public article link"
+                        >
+                          <Copy size={12} /> Copy Article URL
+                        </button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const cleanSlug = cleanBlogSlug(formData.slug || formData.title);
+                            const ok = await copyLinkToClipboard(cleanSlug);
+                            if (ok) showToast('success', `🏷️ Copied Slug: ${cleanSlug}`);
+                          }}
+                          style={{
+                            border: 'none',
+                            background: 'transparent',
+                            color: '#D97706',
+                            fontSize: '0.78rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.2rem',
+                            padding: 0
+                          }}
+                          title="Copy clean URL slug to clipboard"
+                        >
+                          <Tag size={12} /> Copy Slug
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const fullUrl = formatBlogUrl(formData.slug || formData.title, true);
+                            window.open(`https://search.google.com/test/rich-results?url=${encodeURIComponent(fullUrl)}`, '_blank');
+                          }}
+                          style={{
+                            border: 'none',
+                            background: 'transparent',
+                            color: '#EA4335',
+                            fontSize: '0.78rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.2rem',
+                            padding: 0
+                          }}
+                          title="Test Google Search structured data and rich results indexing"
+                        >
+                          <Globe size={12} /> Google Index Test
+                        </button>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', background: '#FFFFFF', border: '1px solid #CBD5E1', borderRadius: '6px', overflow: 'hidden' }}>
+                      <span style={{ padding: '0.5rem 0.75rem', background: '#F1F5F9', color: '#1E293B', fontSize: '0.82rem', borderRight: '1px solid #CBD5E1', userSelect: 'none', fontWeight: 700 }}>
+                        {getActiveSiteOrigin()}/blog/
+                      </span>
+                      <input
+                        type="text"
+                        placeholder="best-church-bible-in-chengalpattu"
+                        value={formData.slug}
+                        onChange={(e) => handleSlugChange(e.target.value)}
+                        style={{ flex: 1, padding: '0.5rem 0.75rem', border: 'none', outline: 'none', fontSize: '0.88rem', color: '#0F172A', fontWeight: 600 }}
+                      />
+                      <span style={{ padding: '0.5rem 0.65rem', background: '#F1F5F9', color: '#64748B', fontSize: '0.82rem', borderLeft: '1px solid #CBD5E1', userSelect: 'none' }}>
+                        /
+                      </span>
+                    </div>
                   </div>
 
                   {/* Category, Author, Read Time */}
@@ -1172,17 +1477,235 @@ export const AdminSEOEditor = () => {
                       <button type="button" aria-label="Insert horizontal divider" onClick={insertHorizontalRule} style={{ padding: '0.25rem 0.5rem', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#FFFFFF', cursor: 'pointer' }}>
                         <Minus size={14} />
                       </button>
+                      <div style={{ width: '1px', height: '18px', background: '#CBD5E1', margin: '0 0.2rem' }} />
+
+                      {/* Internal Link & Blog URL Generator Tool */}
+                      <select
+                        aria-label="Preset internal link"
+                        value={internalLinkUrl}
+                        onChange={(e) => handleSelectPreset(e.target.value)}
+                        style={{
+                          padding: '0.25rem 0.45rem',
+                          background: '#FFFFFF',
+                          border: '1px solid #CBD5E1',
+                          borderRadius: '4px',
+                          color: '#1D4ED8',
+                          fontSize: '0.78rem',
+                          maxWidth: '180px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <optgroup label="📌 Section Anchors">
+                          {categorizedLinkPresets.keyFeatures.map((p) => (
+                            <option key={p.url} value={p.formattedUrl}>
+                              🔗 {p.label}
+                            </option>
+                          ))}
+                        </optgroup>
+
+                        <optgroup label="📄 Site Pages">
+                          {categorizedLinkPresets.sitePages.map((p) => (
+                            <option key={p.url} value={p.formattedUrl}>
+                              📄 {p.label}
+                            </option>
+                          ))}
+                        </optgroup>
+
+                        {categorizedLinkPresets.blogPosts.length > 0 && (
+                          <optgroup label={`📰 Other Blog Articles (${categorizedLinkPresets.blogPosts.length})`}>
+                            {categorizedLinkPresets.blogPosts.map((b) => (
+                              <option key={b.url} value={b.formattedUrl}>
+                                📰 {b.label.length > 32 ? b.label.slice(0, 29) + '...' : b.label}
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
+                      </select>
+
                       <input
                         type="text"
                         aria-label="Internal link URL"
                         value={internalLinkUrl}
                         onChange={(e) => setInternalLinkUrl(e.target.value)}
-                        placeholder="/#key-features"
-                        style={{ minWidth: '150px', flex: '1 1 180px', padding: '0.25rem 0.5rem', fontSize: '0.78rem', borderRadius: '4px', border: '1px solid #CBD5E1' }}
+                        placeholder="/#key-features or /blog/..."
+                        style={{ width: '130px', padding: '0.25rem 0.45rem', fontSize: '0.78rem', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#FFFFFF' }}
                       />
-                      <button type="button" onClick={insertInternalLink} style={{ padding: '0.25rem 0.5rem', fontSize: '0.78rem', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#FFFFFF', cursor: 'pointer' }}>
-                        <LinkIcon size={13} style={{ verticalAlign: 'middle', marginRight: '0.25rem' }} />
-                        Insert internal link
+
+                      <input
+                        type="text"
+                        aria-label="Link Anchor Text"
+                        value={linkAnchorText}
+                        onChange={(e) => setLinkAnchorText(e.target.value)}
+                        placeholder="Anchor Text"
+                        style={{ width: '110px', padding: '0.25rem 0.45rem', fontSize: '0.78rem', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#FFFFFF' }}
+                      />
+
+                      <label
+                        title="Toggle Full Domain (https://www.loveofcalvary.org) vs Relative URL"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.25rem',
+                          fontSize: '0.72rem',
+                          color: useFullUrl ? '#1D4ED8' : '#475569',
+                          cursor: 'pointer',
+                          userSelect: 'none',
+                          padding: '0.2rem 0.4rem',
+                          background: useFullUrl ? '#EFF6FF' : '#FFFFFF',
+                          borderRadius: '4px',
+                          border: useFullUrl ? '1px solid #3B82F6' : '1px solid #CBD5E1'
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={useFullUrl}
+                          onChange={(e) => handleToggleFullUrl(e.target.checked)}
+                          style={{ cursor: 'pointer', margin: 0, width: '12px', height: '12px' }}
+                        />
+                        <span>Full Domain</span>
+                      </label>
+
+                      <button
+                        type="button"
+                        onClick={insertInternalLink}
+                        disabled={!isValidLinkUrl(internalLinkUrl.trim())}
+                        style={{
+                          padding: '0.25rem 0.55rem',
+                          fontSize: '0.78rem',
+                          borderRadius: '4px',
+                          border: '1px solid #2563EB',
+                          background: '#2563EB',
+                          color: '#FFFFFF',
+                          fontWeight: 700,
+                          cursor: isValidLinkUrl(internalLinkUrl.trim()) ? 'pointer' : 'not-allowed',
+                          opacity: isValidLinkUrl(internalLinkUrl.trim()) ? 1 : 0.5,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.25rem'
+                        }}
+                        title="Insert internal link into article content"
+                      >
+                        <LinkIcon size={12} />
+                        <span>Insert Link</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleAutoGenerateRelatedBlog}
+                        style={{
+                          padding: '0.25rem 0.55rem',
+                          fontSize: '0.78rem',
+                          borderRadius: '4px',
+                          border: '1px solid #10B981',
+                          background: '#047857',
+                          color: '#FFFFFF',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.25rem'
+                        }}
+                        title="Auto-detect & generate another blog URL related to this article"
+                      >
+                        <Sparkles size={12} />
+                        <span>Related Blog</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleCopyLinkManually('html')}
+                        disabled={!isValidLinkUrl(internalLinkUrl.trim())}
+                        style={{
+                          padding: '0.25rem 0.55rem',
+                          fontSize: '0.78rem',
+                          borderRadius: '4px',
+                          border: '1px solid #475569',
+                          background: copiedLinkKey === 'blog_html' ? '#059669' : '#1E293B',
+                          color: '#FFFFFF',
+                          fontWeight: 700,
+                          cursor: isValidLinkUrl(internalLinkUrl.trim()) ? 'pointer' : 'not-allowed',
+                          opacity: isValidLinkUrl(internalLinkUrl.trim()) ? 1 : 0.5,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.25rem',
+                          transition: 'background 0.2s ease'
+                        }}
+                        title="Manually copy HTML link (<a href='...'>Anchor</a>) to clipboard"
+                      >
+                        {copiedLinkKey === 'blog_html' ? <Check size={12} /> : <Copy size={12} />}
+                        <span>{copiedLinkKey === 'blog_html' ? 'Copied HTML!' : 'Copy HTML'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleCopyLinkManually('url')}
+                        disabled={!isValidLinkUrl(internalLinkUrl.trim())}
+                        style={{
+                          padding: '0.25rem 0.45rem',
+                          fontSize: '0.72rem',
+                          borderRadius: '4px',
+                          border: '1px solid #CBD5E1',
+                          background: copiedLinkKey === 'blog_url' ? '#059669' : '#FFFFFF',
+                          color: copiedLinkKey === 'blog_url' ? '#FFFFFF' : '#475569',
+                          fontWeight: 600,
+                          cursor: isValidLinkUrl(internalLinkUrl.trim()) ? 'pointer' : 'not-allowed',
+                          opacity: isValidLinkUrl(internalLinkUrl.trim()) ? 1 : 0.5,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.2rem',
+                          transition: 'background 0.2s ease'
+                        }}
+                        title="Manually copy raw URL to clipboard"
+                      >
+                        {copiedLinkKey === 'blog_url' ? <Check size={11} /> : <LinkIcon size={11} />}
+                        <span>{copiedLinkKey === 'blog_url' ? 'Copied!' : 'Copy URL'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleCopyLinkManually('slug')}
+                        disabled={!isValidLinkUrl(internalLinkUrl.trim())}
+                        style={{
+                          padding: '0.25rem 0.45rem',
+                          fontSize: '0.72rem',
+                          borderRadius: '4px',
+                          border: '1px solid #CBD5E1',
+                          background: copiedLinkKey === 'blog_slug' ? '#059669' : '#FFFFFF',
+                          color: copiedLinkKey === 'blog_slug' ? '#FFFFFF' : '#475569',
+                          fontWeight: 600,
+                          cursor: isValidLinkUrl(internalLinkUrl.trim()) ? 'pointer' : 'not-allowed',
+                          opacity: isValidLinkUrl(internalLinkUrl.trim()) ? 1 : 0.5,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.2rem',
+                          transition: 'background 0.2s ease'
+                        }}
+                        title="Manually copy clean slug to clipboard (e.g. best-church-bible-in-chengalpattu)"
+                      >
+                        {copiedLinkKey === 'blog_slug' ? <Check size={11} /> : <Tag size={11} />}
+                        <span>{copiedLinkKey === 'blog_slug' ? 'Copied Slug!' : 'Copy Slug'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleAutoLinkArticleContent}
+                        style={{
+                          padding: '0.25rem 0.55rem',
+                          fontSize: '0.78rem',
+                          borderRadius: '4px',
+                          border: '1px solid #0284C7',
+                          background: 'linear-gradient(135deg, #0284C7 0%, #2563EB 100%)',
+                          color: '#FFFFFF',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.25rem'
+                        }}
+                        title="Auto-scan article content and link blog articles & key features keywords"
+                      >
+                        <Sparkles size={12} />
+                        <span>Auto-Link</span>
                       </button>
                     </div>
 
@@ -1355,7 +1878,7 @@ export const AdminSEOEditor = () => {
                         />
                         <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.25 }}>
                           <span style={{ fontSize: '0.82rem', color: '#202124', fontWeight: 600 }}>Compassionate Love of Calvary Ministries</span>
-                          <span style={{ color: '#4d5156', fontSize: '0.74rem' }}>https://www.loveofcalvary.org › blog › {formData.slug || 'article-slug'}</span>
+                          <span style={{ color: '#4d5156', fontSize: '0.74rem' }}>https://blog.loveofcalavary.org › {formData.slug || 'best-church-bible-in-chengalpattu'}</span>
                         </div>
                       </div>
 

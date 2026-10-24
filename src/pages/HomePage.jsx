@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '../routes/routes';
 import { useSiteContent } from '../context/SiteContentContext';
@@ -19,7 +19,8 @@ import {
   CheckCircle2, 
   Clock, 
   MapPin, 
-  Shield 
+  Shield,
+  Loader2
 } from 'lucide-react';
 import { api, getMediaUrl } from '../services/api';
 import { PageSEOSection } from '../components/PageSEOSection';
@@ -28,6 +29,22 @@ export const HomePage = () => {
   const { content, featuredMinistries, upcomingEvents, latestSermon, recentDevotional, testimonials } = useSiteContent();
   const [prayerModalOpen, setPrayerModalOpen] = useState(false);
   const [donationModalOpen, setDonationModalOpen] = useState(false);
+  const [recentBlogs, setRecentBlogs] = useState([]);
+  const [blogsLoading, setBlogsLoading] = useState(true);
+
+  useEffect(() => {
+    api.getBlogPosts()
+      .then(data => {
+        const posts = Array.isArray(data?.posts) ? data.posts : [];
+        setRecentBlogs(posts.filter(p => p.is_published !== false).slice(0, 3));
+      })
+      .catch(err => {
+        console.error('Failed to load recent blogs for home page:', err);
+      })
+      .finally(() => {
+        setBlogsLoading(false);
+      });
+  }, []);
   
   // Prayer Section Form State
 
@@ -421,6 +438,118 @@ export const HomePage = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 9. LATEST MINISTRY ARTICLES & BLOG SECTION */}
+      <section className="section" style={{ background: '#FFFFFF', borderTop: '1px solid var(--border-subtle)', borderBottom: '1px solid var(--border-subtle)' }}>
+        <div className="container">
+          <div className="section-header">
+            <span className="section-badge">Biblical Wisdom &amp; Teachings</span>
+            <h2 className="section-title">Latest Ministry Articles &amp; Blog</h2>
+            <p className="section-subtitle">
+              Inspirational Christian teachings, practical biblical wisdom, and spiritual guidance to strengthen your daily walk with Christ.
+            </p>
+          </div>
+
+          {blogsLoading ? (
+            <div style={{ textAlign: 'center', padding: '3rem 0', color: '#64748B' }}>
+              <Loader2 size={34} className="animate-spin" style={{ margin: '0 auto 0.75rem auto', color: 'var(--gold-primary)' }} />
+              <p style={{ margin: 0, fontSize: '0.95rem' }}>Loading ministry articles...</p>
+            </div>
+          ) : recentBlogs.length === 0 ? null : (
+            <div className="grid-3" style={{ gap: '2rem' }}>
+              {recentBlogs.map((post) => {
+                const imgUrl = getMediaUrl(post.effective_image_url || post.featured_image_url);
+                const postDate = new Date(post.published_at || post.created_at).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                });
+
+                return (
+                  <article key={post.id} style={{
+                    background: '#FFFFFF',
+                    borderRadius: '16px',
+                    overflow: 'hidden',
+                    border: '1px solid #E2E8F0',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    transition: 'transform 0.25s ease, box-shadow 0.25s ease'
+                  }}>
+                    <div style={{ position: 'relative', height: '210px', background: '#0B192C', overflow: 'hidden' }}>
+                      {imgUrl ? (
+                        <img
+                          src={imgUrl}
+                          alt={post.title}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          loading="lazy"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = 'https://images.unsplash.com/photo-1504052434569-70ad5836ab65?auto=format&fit=crop&w=800&q=80';
+                          }}
+                        />
+                      ) : (
+                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94A3B8' }}>
+                          <BookOpen size={36} />
+                        </div>
+                      )}
+                      <span style={{
+                        position: 'absolute',
+                        top: '1rem',
+                        left: '1rem',
+                        background: 'rgba(11, 25, 44, 0.9)',
+                        backdropFilter: 'blur(6px)',
+                        color: 'var(--gold-primary)',
+                        padding: '0.3rem 0.75rem',
+                        borderRadius: '20px',
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        border: '1px solid rgba(212, 175, 55, 0.4)'
+                      }}>
+                        {post.category}
+                      </span>
+                    </div>
+
+                    <div style={{ padding: '1.5rem', flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: '#64748B', marginBottom: '0.65rem' }}>
+                          <Clock size={13} />
+                          <span>{post.read_time || '5 min read'}</span>
+                          <span>&bull;</span>
+                          <span>{postDate}</span>
+                        </div>
+
+                        <h3 style={{ fontSize: '1.2rem', color: '#0F172A', margin: '0 0 0.65rem 0', lineHeight: 1.4, fontFamily: 'var(--font-heading)' }}>
+                          <Link to={`/blog/${post.slug}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                            {post.title}
+                          </Link>
+                        </h3>
+
+                        <p style={{ color: '#475569', fontSize: '0.92rem', lineHeight: 1.6, margin: '0 0 1.25rem 0' }}>
+                          {post.excerpt ? (post.excerpt.length > 130 ? post.excerpt.substring(0, 130) + '...' : post.excerpt) : 'Read practical Christian teachings and biblical truth...'}
+                        </p>
+                      </div>
+
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '1rem', borderTop: '1px solid #F1F5F9' }}>
+                        <span style={{ fontSize: '0.8rem', color: '#64748B' }}>By <strong>{post.author || 'Pastor David Raj'}</strong></span>
+                        <Link to={`/blog/${post.slug}`} className="btn btn-outline-gold btn-sm" style={{ padding: '0.35rem 0.85rem' }}>
+                          Read Article &rarr;
+                        </Link>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+
+          <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+            <Link to={ROUTES.BLOG} className="btn btn-navy btn-lg">
+              Explore All Articles &amp; Blog &rarr;
+            </Link>
           </div>
         </div>
       </section>

@@ -3,6 +3,23 @@ import { api, getMediaUrl } from '../../services/api';
 import { ROUTES } from '../../routes/routes';
 import { MediaPickerModal } from '../../components/MediaPickerModal';
 import SEOManagementPanel from '../../components/SEOManagementPanel';
+import {
+  SITE_BASE_URL,
+  BLOG_BASE_URL,
+  KEY_FEATURES_PRESET,
+  SITE_PAGE_PRESETS,
+  isValidLinkUrl,
+  formatLinkUrl,
+  formatBlogUrl,
+  cleanBlogSlug,
+  generateBlogSlugFromContent,
+  generateBlogUrl,
+  isInternalOrMinistryUrl,
+  findRelatedBlogs,
+  buildCategorizedPresets,
+  copyLinkToClipboard,
+  autoLinkContentText
+} from '../../utils/linkAutoGenerator';
 import { 
   Globe, Search, Save, Eye, CheckCircle2, AlertCircle, Sparkles, 
   Smartphone, Monitor, ExternalLink, ShieldCheck, Tag, Link2, Share2, 
@@ -198,19 +215,11 @@ const slugify = (value) => value
   .replace(/[^a-z0-9]+/g, '-')
   .replace(/^-+|-+$/g, '');
 
-const isInternalPath = (value) => /^\/(?!\/)[A-Za-z0-9/_#?&=.%+-]*$/.test(value);
+export const isInternalPath = isValidLinkUrl;
 
 export const INTERNAL_LINK_PRESETS = [
-  { label: 'Key Features & Core Pillars', url: '/#key-features' },
-  { label: 'About Our Ministry', url: '/about' },
-  { label: 'Ministries & Outreach', url: '/ministries' },
-  { label: 'Bible Study & Discipleship', url: '/study' },
-  { label: 'Daily Devotionals', url: '/devotional' },
-  { label: 'Gospel Sermons', url: '/sermons' },
-  { label: 'Church Events', url: '/events' },
-  { label: 'Prayer Request & Contact', url: '/contact' },
-  { label: 'Holy Scriptures Bible', url: '/bible' },
-  { label: 'Ministry Articles & Blog', url: '/blog' },
+  { label: KEY_FEATURES_PRESET.label, url: KEY_FEATURES_PRESET.url },
+  ...SITE_PAGE_PRESETS.map((p) => ({ label: p.label, url: p.url })),
 ];
 
 export const compileSectionsToHtml = (sections, focusKeyword = '') => {
@@ -483,6 +492,9 @@ export const AdminPageSEOEditor = () => {
   });
   const [internalLinkUrl, setInternalLinkUrl] = useState('/#key-features');
   const [linkAnchorText, setLinkAnchorText] = useState('Key Features');
+  const [useFullUrl, setUseFullUrl] = useState(true);
+  const [blogsList, setBlogsList] = useState([]);
+  const [copiedKey, setCopiedKey] = useState(null);
   const [pageStatuses, setPageStatuses] = useState(() => Object.fromEntries(
     PAGES.map((page) => [page.id, { status: 'loading', busy: false }])
   ));
@@ -580,6 +592,21 @@ export const AdminPageSEOEditor = () => {
   useEffect(() => {
     fetchPageSEO(selectedPage);
   }, [selectedPage]);
+
+  // Fetch all published/existing blog posts to dynamically populate blog URLs in content block toolbars
+  useEffect(() => {
+    let isMounted = true;
+    api.getAdminBlogs()
+      .then((data) => {
+        if (isMounted && Array.isArray(data)) {
+          setBlogsList(data);
+        }
+      })
+      .catch((err) => {
+        console.warn('Could not load blogs for internal link options:', err);
+      });
+    return () => { isMounted = false; };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -859,16 +886,161 @@ export const AdminPageSEOEditor = () => {
     }, 0);
   };
 
+  const categorizedLinkPresets = useMemo(() => {
+    return buildCategorizedPresets(blogsList, '', useFullUrl);
+  }, [blogsList, useFullUrl]);
+
+  const handleSelectPreset = (val) => {
+    if (!val || val === 'custom') return;
+    const allPresets = [
+      ...categorizedLinkPresets.keyFeatures,
+      ...categorizedLinkPresets.sitePages,
+      ...categorizedLinkPresets.blogPosts,
+    ];
+    const found = allPresets.find(p => p.url === val || p.formattedUrl === val);
+    if (found) {
+      setInternalLinkUrl(found.formattedUrl);
+      setLinkAnchorText(found.anchor);
+    } else {
+      setInternalLinkUrl(formatLinkUrl(val, useFullUrl));
+    }
+  };
+
+  const handleToggleFullUrl = (checked) => {
+    setUseFullUrl(checked);
+    setInternalLinkUrl(prev => formatLinkUrl(prev, checked));
+  };
+
+  const handleAutoGenerateRelatedBlog = (targetKey, subKey = 'content') => {
+    const content = sections[targetKey]?.[subKey] || '';
+    const heading = sections[targetKey]?.heading || '';
+    const related = findRelatedBlogs(content, heading, blogsList);
+
+    if (related.length > 0 && related[0].relevanceScore > 0) {
+      const top = related[0];
+      const blogUrl = formatBlogUrl(top.slug, useFullUrl);
+      setInternalLinkUrl(blogUrl);
+      setLinkAnchorText(top.title || top.slug);
+      const reason = top.matchedKeywords?.slice(0, 3).join(', ');
+      setFeedback({
+        type: 'success',
+        text: `🎯 Auto-matched related blog: "${top.title}"${reason ? ` (matched: ${reason})` : ''}`,
+      });
+    } else if (blogsList.length > 0) {
+      const fallback = blogsList[0];
+      const blogUrl = formatBlogUrl(fallback.slug, useFullUrl);
+      setInternalLinkUrl(blogUrl);
+      setLinkAnchorText(fallback.title || fallback.slug);
+      setFeedback({
+        type: 'success',
+        text: `📰 Selected blog URL: "${fallback.title}"`,
+      });
+    } else {
+      setFeedback({
+        type: 'error',
+        text: 'No published blogs available yet to generate related URL.',
+      });
+    }
+    setTimeout(() => setFeedback({ type: '', text: '' }), 4500);
+  };
+
+  const handleGenerateBlogSlugFromBlock = (targetKey, subKey = 'content') => {
+    const content = sections[targetKey]?.[subKey] || '';
+    const heading = sections[targetKey]?.heading || '';
+    const generatedSlug = generateBlogSlugFromContent({
+      heading,
+      content,
+      focusKeyword: seoData.focus_keyword,
+      metaKeywords: seoData.meta_keywords,
+    });
+
+    const blogUrl = formatBlogUrl(generatedSlug, useFullUrl);
+    setInternalLinkUrl(blogUrl);
+    
+    const readableAnchor = heading 
+      ? heading.replace(/<[^>]+>/g, '').trim()
+      : generatedSlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    setLinkAnchorText(readableAnchor);
+
+    setFeedback({
+      type: 'success',
+      text: `⚡ Generated block blog URL: ${blogUrl}`,
+    });
+    setTimeout(() => setFeedback({ type: '', text: '' }), 5000);
+  };
+
+  const handleCopyLinkManually = async (targetKey, format = 'html') => {
+    const targetUrl = internalLinkUrl.trim();
+    if (!targetUrl || !isValidLinkUrl(targetUrl)) {
+      setFeedback({ type: 'error', text: 'Please enter or select a valid URL first to copy.' });
+      setTimeout(() => setFeedback({ type: '', text: '' }), 3500);
+      return;
+    }
+    const linkText = linkAnchorText.trim() || 'Key Features';
+    const isExternal = !isInternalOrMinistryUrl(targetUrl);
+    
+    let textToCopy = '';
+    let successMessage = '';
+    if (format === 'slug') {
+      textToCopy = cleanBlogSlug(targetUrl);
+      successMessage = `🏷️ Copied Slug: ${textToCopy}`;
+    } else if (format === 'url') {
+      textToCopy = targetUrl;
+      successMessage = `📋 Copied URL: ${textToCopy}`;
+    } else {
+      textToCopy = `<a href="${targetUrl}"${isExternal ? ' target="_blank" rel="noopener noreferrer"' : ''}>${linkText}</a>`;
+      successMessage = `📋 Copied HTML: ${textToCopy}`;
+    }
+
+    const success = await copyLinkToClipboard(textToCopy);
+    if (success) {
+      setCopiedKey(`${targetKey}_${format}`);
+      setFeedback({ type: 'success', text: successMessage });
+      setTimeout(() => setCopiedKey(null), 2500);
+      setTimeout(() => setFeedback({ type: '', text: '' }), 4000);
+    } else {
+      setFeedback({ type: 'error', text: 'Failed to copy to clipboard.' });
+      setTimeout(() => setFeedback({ type: '', text: '' }), 3500);
+    }
+  };
+
+  const handleAutoLinkKeywords = (targetKey, subKey = 'content') => {
+    const currentValue = sections[targetKey]?.[subKey] || '';
+    if (!currentValue.trim()) {
+      setFeedback({ type: 'error', text: 'This content block is currently empty.' });
+      setTimeout(() => setFeedback({ type: '', text: '' }), 4000);
+      return;
+    }
+    const { updated, count } = autoLinkContentText(currentValue, {
+      blogs: blogsList,
+      useFullDomain: useFullUrl,
+    });
+    if (count > 0) {
+      setSections(prev => ({
+        ...prev,
+        [targetKey]: {
+          ...prev[targetKey],
+          [subKey]: updated,
+        }
+      }));
+      setFeedback({ type: 'success', text: `✨ Auto-generated ${count} internal link(s) for blog & key features!` });
+    } else {
+      setFeedback({ type: 'success', text: 'All key features and blog links are already linked in this block.' });
+    }
+    setTimeout(() => setFeedback({ type: '', text: '' }), 4500);
+  };
+
   const insertInternalLinkIntoField = (targetKey, subKey = 'content') => {
     const targetUrl = internalLinkUrl.trim();
-    if (!targetUrl) return;
+    if (!targetUrl || !isValidLinkUrl(targetUrl)) return;
     const textarea = document.getElementById(`page-content-${targetKey}`);
     const currentValue = sections[targetKey]?.[subKey] || '';
     const start = textarea?.selectionStart ?? currentValue.length;
     const end = textarea?.selectionEnd ?? currentValue.length;
     const selected = currentValue.substring(start, end);
     const linkText = linkAnchorText.trim() || selected.trim() || 'Key Features';
-    const replacement = `<a href="${targetUrl}">${linkText}</a>`;
+    const isExternal = !isInternalOrMinistryUrl(targetUrl);
+    const replacement = `<a href="${targetUrl}"${isExternal ? ' target="_blank" rel="noopener noreferrer"' : ''}>${linkText}</a>`;
     const updated = currentValue.substring(0, start) + replacement + currentValue.substring(end);
     setSections(prev => ({
       ...prev,
@@ -928,21 +1100,67 @@ export const AdminPageSEOEditor = () => {
 
       <div style={{ width: '1px', height: '18px', background: '#334155', margin: '0 0.3rem' }} />
 
-      {/* Internal Link Tool */}
+      {/* Internal Link & Blog URL Generator Tool */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap', flex: '1 1 auto' }}>
         <select
           aria-label="Preset internal link"
           value={internalLinkUrl}
-          onChange={(e) => {
-            const found = INTERNAL_LINK_PRESETS.find(p => p.url === e.target.value);
-            setInternalLinkUrl(e.target.value);
-            if (found) setLinkAnchorText(found.label);
+          onChange={(e) => handleSelectPreset(e.target.value)}
+          style={{
+            padding: '0.25rem 0.45rem',
+            background: '#111C33',
+            border: '1px solid #334155',
+            borderRadius: '5px',
+            color: '#60A5FA',
+            fontSize: '0.74rem',
+            maxWidth: '190px'
           }}
-          style={{ padding: '0.25rem 0.45rem', background: '#111C33', border: '1px solid #334155', borderRadius: '5px', color: '#60A5FA', fontSize: '0.74rem', maxWidth: '170px' }}
         >
-          {INTERNAL_LINK_PRESETS.map((p) => (
-            <option key={p.url} value={p.url}>🔗 {p.label}</option>
-          ))}
+          {(() => {
+            const blockContent = sections[targetKey]?.[subKey] || '';
+            const blockHeading = sections[targetKey]?.heading || '';
+            const blockPresets = buildCategorizedPresets(blogsList, '', useFullUrl, blockContent, blockHeading);
+
+            return (
+              <>
+                {blockPresets.relatedBlogs && blockPresets.relatedBlogs.length > 0 && (
+                  <optgroup label="🎯 Related to this Content Block">
+                    {blockPresets.relatedBlogs.map((b) => (
+                      <option key={'rel_' + b.url} value={b.formattedUrl}>
+                        {b.label.length > 34 ? b.label.slice(0, 31) + '...' : b.label} (Top Match)
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+
+                <optgroup label="📌 Section Anchors">
+                  {blockPresets.keyFeatures.map((p) => (
+                    <option key={p.url} value={p.formattedUrl}>
+                      🔗 {p.label}
+                    </option>
+                  ))}
+                </optgroup>
+
+                <optgroup label="📄 Site Pages">
+                  {blockPresets.sitePages.map((p) => (
+                    <option key={p.url} value={p.formattedUrl}>
+                      📄 {p.label}
+                    </option>
+                  ))}
+                </optgroup>
+
+                {blockPresets.blogPosts.length > 0 && (
+                  <optgroup label={`📰 All Blog Articles (${blockPresets.blogPosts.length})`}>
+                    {blockPresets.blogPosts.map((b) => (
+                      <option key={b.url} value={b.formattedUrl}>
+                        📰 {b.label.length > 34 ? b.label.slice(0, 31) + '...' : b.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+              </>
+            );
+          })()}
         </select>
 
         <input
@@ -950,8 +1168,8 @@ export const AdminPageSEOEditor = () => {
           aria-label="Internal link URL"
           value={internalLinkUrl}
           onChange={(event) => setInternalLinkUrl(event.target.value)}
-          placeholder="/#key-features"
-          style={{ width: '120px', padding: '0.25rem 0.45rem', background: '#111C33', border: '1px solid #334155', borderRadius: '5px', color: '#E2E8F0', fontSize: '0.74rem' }}
+          placeholder="/#key-features or https://www.loveofcalvary.org/blog/.../"
+          style={{ width: '155px', padding: '0.25rem 0.45rem', background: '#111C33', border: '1px solid #334155', borderRadius: '5px', color: '#E2E8F0', fontSize: '0.74rem' }}
         />
 
         <input
@@ -963,28 +1181,226 @@ export const AdminPageSEOEditor = () => {
           style={{ width: '110px', padding: '0.25rem 0.45rem', background: '#111C33', border: '1px solid #334155', borderRadius: '5px', color: '#E2E8F0', fontSize: '0.74rem' }}
         />
 
+        <label
+          title="Toggle Full Domain (https://www.loveofcalvary.org) vs Relative URL"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.25rem',
+            fontSize: '0.7rem',
+            color: useFullUrl ? '#60A5FA' : '#94A3B8',
+            cursor: 'pointer',
+            userSelect: 'none',
+            padding: '0.2rem 0.4rem',
+            background: useFullUrl ? 'rgba(37,99,235,0.18)' : '#0F172A',
+            borderRadius: '5px',
+            border: useFullUrl ? '1px solid #3B82F6' : '1px solid #334155'
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={useFullUrl}
+            onChange={(e) => handleToggleFullUrl(e.target.checked)}
+            style={{ cursor: 'pointer', margin: 0, width: '12px', height: '12px' }}
+          />
+          <span>Full Domain</span>
+        </label>
+
         <button
           type="button"
           onClick={() => insertInternalLinkIntoField(targetKey, subKey)}
-          disabled={!isInternalPath(internalLinkUrl.trim())}
+          disabled={!isValidLinkUrl(internalLinkUrl.trim())}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: '0.25rem',
             padding: '0.25rem 0.6rem',
-            background: isInternalPath(internalLinkUrl.trim()) ? '#2563EB' : '#1E293B',
+            background: isValidLinkUrl(internalLinkUrl.trim()) ? '#2563EB' : '#1E293B',
             border: 'none',
             borderRadius: '5px',
             color: '#FFFFFF',
             fontSize: '0.74rem',
             fontWeight: 700,
-            cursor: isInternalPath(internalLinkUrl.trim()) ? 'pointer' : 'not-allowed',
-            opacity: isInternalPath(internalLinkUrl.trim()) ? 1 : 0.5
+            cursor: isValidLinkUrl(internalLinkUrl.trim()) ? 'pointer' : 'not-allowed',
+            opacity: isValidLinkUrl(internalLinkUrl.trim()) ? 1 : 0.5
           }}
-          title="Insert internal link"
+          title="Insert internal link into content block"
         >
           <LinkIcon size={12} />
           <span>Insert Link</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            const target = internalLinkUrl.trim();
+            if (isValidLinkUrl(target)) {
+              const fullUrl = target.startsWith('http')
+                ? target
+                : `${window.location.origin}${target.startsWith('/') ? '' : '/'}${target}`;
+              window.open(fullUrl, '_blank');
+            }
+          }}
+          disabled={!isValidLinkUrl(internalLinkUrl.trim())}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.25rem',
+            padding: '0.25rem 0.55rem',
+            background: isValidLinkUrl(internalLinkUrl.trim()) ? '#059669' : '#1E293B',
+            border: 'none',
+            borderRadius: '5px',
+            color: '#FFFFFF',
+            fontSize: '0.74rem',
+            fontWeight: 700,
+            cursor: isValidLinkUrl(internalLinkUrl.trim()) ? 'pointer' : 'not-allowed',
+            opacity: isValidLinkUrl(internalLinkUrl.trim()) ? 1 : 0.5
+          }}
+          title="Open active link in new browser tab to verify it works"
+        >
+          <ExternalLink size={12} />
+          <span>Open Link</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleGenerateBlogSlugFromBlock(targetKey, subKey)}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.25rem',
+            padding: '0.25rem 0.55rem',
+            background: '#D97706',
+            border: '1px solid #F59E0B',
+            borderRadius: '5px',
+            color: '#FFFFFF',
+            fontSize: '0.74rem',
+            fontWeight: 700,
+            cursor: 'pointer'
+          }}
+          title="Auto-generate blog URL slug based on this block content, main keyword & internal keywords (e.g. https://blog.loveofcalavary.org/best-church-bible-in-chengalpattu/)"
+        >
+          <Sparkles size={12} />
+          <span>Blog Slug</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleAutoGenerateRelatedBlog(targetKey, subKey)}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.25rem',
+            padding: '0.25rem 0.55rem',
+            background: '#047857',
+            border: '1px solid #10B981',
+            borderRadius: '5px',
+            color: '#FFFFFF',
+            fontSize: '0.74rem',
+            fontWeight: 700,
+            cursor: 'pointer'
+          }}
+          title="Auto-detect & generate the blog URL most related to this block content"
+        >
+          <Sparkles size={12} />
+          <span>Related Blog</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleCopyLinkManually(targetKey, 'html')}
+          disabled={!isValidLinkUrl(internalLinkUrl.trim())}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.25rem',
+            padding: '0.25rem 0.55rem',
+            background: copiedKey === `${targetKey}_html` ? '#059669' : '#1E293B',
+            border: '1px solid #475569',
+            borderRadius: '5px',
+            color: '#FFFFFF',
+            fontSize: '0.74rem',
+            fontWeight: 700,
+            cursor: isValidLinkUrl(internalLinkUrl.trim()) ? 'pointer' : 'not-allowed',
+            opacity: isValidLinkUrl(internalLinkUrl.trim()) ? 1 : 0.5,
+            transition: 'background 0.2s ease'
+          }}
+          title="Manually copy HTML link (<a href='...'>Anchor</a>) to clipboard"
+        >
+          {copiedKey === `${targetKey}_html` ? <Check size={12} /> : <Copy size={12} />}
+          <span>{copiedKey === `${targetKey}_html` ? 'Copied HTML!' : 'Copy HTML'}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleCopyLinkManually(targetKey, 'url')}
+          disabled={!isValidLinkUrl(internalLinkUrl.trim())}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.2rem',
+            padding: '0.25rem 0.45rem',
+            background: copiedKey === `${targetKey}_url` ? '#059669' : '#1E293B',
+            border: '1px solid #475569',
+            borderRadius: '5px',
+            color: '#CBD5E1',
+            fontSize: '0.72rem',
+            fontWeight: 600,
+            cursor: isValidLinkUrl(internalLinkUrl.trim()) ? 'pointer' : 'not-allowed',
+            opacity: isValidLinkUrl(internalLinkUrl.trim()) ? 1 : 0.5,
+            transition: 'background 0.2s ease'
+          }}
+          title="Manually copy raw URL to clipboard"
+        >
+          {copiedKey === `${targetKey}_url` ? <Check size={11} /> : <LinkIcon size={11} />}
+          <span>{copiedKey === `${targetKey}_url` ? 'Copied!' : 'Copy URL'}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleCopyLinkManually(targetKey, 'slug')}
+          disabled={!isValidLinkUrl(internalLinkUrl.trim())}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.2rem',
+            padding: '0.25rem 0.45rem',
+            background: copiedKey === `${targetKey}_slug` ? '#059669' : '#1E293B',
+            border: '1px solid #475569',
+            borderRadius: '5px',
+            color: '#CBD5E1',
+            fontSize: '0.72rem',
+            fontWeight: 600,
+            cursor: isValidLinkUrl(internalLinkUrl.trim()) ? 'pointer' : 'not-allowed',
+            opacity: isValidLinkUrl(internalLinkUrl.trim()) ? 1 : 0.5,
+            transition: 'background 0.2s ease'
+          }}
+          title="Manually copy clean URL slug to clipboard (e.g. best-church-bible-in-chengalpattu)"
+        >
+          {copiedKey === `${targetKey}_slug` ? <Check size={11} /> : <Tag size={11} />}
+          <span>{copiedKey === `${targetKey}_slug` ? 'Copied Slug!' : 'Copy Slug'}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleAutoLinkKeywords(targetKey, subKey)}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.25rem',
+            padding: '0.25rem 0.55rem',
+            background: 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%)',
+            border: '1px solid #3B82F6',
+            borderRadius: '5px',
+            color: '#FFFFFF',
+            fontSize: '0.74rem',
+            fontWeight: 700,
+            cursor: 'pointer'
+          }}
+          title="Auto-scan and link keywords & blog titles across this block content"
+        >
+          <Sparkles size={12} />
+          <span>Auto-Link</span>
         </button>
       </div>
     </div>

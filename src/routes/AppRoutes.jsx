@@ -75,17 +75,25 @@ const SEOPageSlugRoute = () => {
       const successfulResults = results
         .filter((result) => result.status === 'fulfilled')
         .map((result) => result.value);
-      const match = successfulResults.find((page) => page.seoData?.slug === slug);
+      const cleanSlug = (slug || '').replace(/^\/+|\/+$/g, '');
+      const match = successfulResults.find((page) => page.seoData?.slug === cleanSlug || page.seoData?.slug === slug);
       if (match) {
         setRouteResult({ slug, status: 'matched', Component: match.Component });
-      } else if (results.some((result) => result.status === 'rejected')) {
-        const failures = results
-          .filter((result) => result.status === 'rejected')
-          .map((result) => result.reason);
-        console.error(`Failed to resolve the public page URL "${slug}".`, failures);
-        setRouteResult({ slug, status: 'error', Component: null });
       } else {
-        setRouteResult({ slug, status: 'not-found', Component: null });
+        // Check if the slug corresponds to an active blog article
+        api.getBlogPostBySlug(cleanSlug)
+          .then((blogData) => {
+            if (!isMounted) return;
+            if (blogData && blogData.post) {
+              setRouteResult({ slug, status: 'matched', Component: BlogDetailPage });
+            } else {
+              setRouteResult({ slug, status: 'not-found', Component: null });
+            }
+          })
+          .catch(() => {
+            if (!isMounted) return;
+            setRouteResult({ slug, status: 'not-found', Component: null });
+          });
       }
     });
 
@@ -118,6 +126,7 @@ export const AppRoutes = () => {
         <Route path={ROUTES.EVENTS} element={<EventsPage />} />
         <Route path={ROUTES.BLOG} element={<BlogPage />} />
         <Route path={ROUTES.BLOG_DETAIL} element={<BlogDetailPage />} />
+        <Route path="/blog/:slug/" element={<BlogDetailPage />} />
         <Route path={ROUTES.MEDIA} element={<MediaPage />} />
         <Route path={ROUTES.CONTACT} element={<ContactPage />} />
         <Route path="/:slug" element={<SEOPageSlugRoute />} />

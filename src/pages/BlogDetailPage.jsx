@@ -6,7 +6,7 @@ import { convertWordPressToHtml } from '../utils/wpToHtmlConverter';
 import { 
   Globe, Calendar, Clock, User, Share2, 
   ArrowLeft, ArrowRight, BookOpen, Check, 
-  Copy, MessageCircle, Loader2, Sparkles, Heart, Eye
+  Copy, MessageCircle, Loader2, Sparkles, Heart, Eye, Tag
 } from 'lucide-react';
 
 export const BlogDetailPage = () => {
@@ -24,7 +24,9 @@ export const BlogDetailPage = () => {
     setLoading(true);
     setError(null);
 
-    api.getBlogPostBySlug(slug)
+    const cleanSlug = (slug || '').trim().replace(/^\/+|\/+$/g, '');
+
+    api.getBlogPostBySlug(cleanSlug)
       .then(data => {
         setPost(data.post);
         setRelatedPosts(data.related_posts || []);
@@ -47,6 +49,15 @@ export const BlogDetailPage = () => {
           document.head.appendChild(metaDescEl);
         }
         metaDescEl.content = pageDesc;
+
+        // Robots Meta Tag for Googlebot Indexing
+        let robotsEl = document.querySelector('meta[name="robots"]');
+        if (!robotsEl) {
+          robotsEl = document.createElement('meta');
+          robotsEl.name = 'robots';
+          document.head.appendChild(robotsEl);
+        }
+        robotsEl.content = 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
 
         // Canonical URL Tag
         let canonicalEl = document.querySelector('link[rel="canonical"]');
@@ -74,7 +85,7 @@ export const BlogDetailPage = () => {
         setMetaTag('og:type', 'article');
         if (pageImg) setMetaTag('og:image', pageImg);
 
-        // JSON-LD Structured Data for Google Search Indexing
+        // JSON-LD Structured Data for Google Search Indexing & Rich Results
         let scriptEl = document.getElementById('clm-blog-structured-data');
         if (!scriptEl) {
           scriptEl = document.createElement('script');
@@ -83,33 +94,59 @@ export const BlogDetailPage = () => {
           document.head.appendChild(scriptEl);
         }
 
-        const schemaData = {
-          "@context": "https://schema.org",
-          "@type": data.post.schema_type || "BlogPosting",
-          "headline": data.post.title,
-          "description": pageDesc,
-          "image": pageImg || "https://www.loveofcalvary.org/logo.png",
-          "author": {
-            "@type": "Person",
-            "name": data.post.author || "Pastor David Raj"
-          },
-          "publisher": {
-            "@type": "Organization",
-            "name": "Compassionate Love of Calvary Ministries",
-            "logo": {
-              "@type": "ImageObject",
-              "url": "https://www.loveofcalvary.org/logo.png",
-              "width": 500,
-              "height": 500
+        const schemaData = [
+          {
+            "@context": "https://schema.org",
+            "@type": data.post.schema_type || "BlogPosting",
+            "headline": data.post.title,
+            "description": pageDesc,
+            "image": pageImg || "https://www.loveofcalvary.org/logo.png",
+            "author": {
+              "@type": "Person",
+              "name": data.post.author || "Pastor David Raj"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "Compassionate Love of Calvary Ministries",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.loveofcalvary.org/logo.png",
+                "width": 500,
+                "height": 500
+              }
+            },
+            "datePublished": data.post.published_at || data.post.created_at,
+            "dateModified": data.post.updated_at || data.post.created_at,
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": pageUrl
             }
           },
-          "datePublished": data.post.published_at || data.post.created_at,
-          "dateModified": data.post.updated_at || data.post.created_at,
-          "mainEntityOfPage": {
-            "@type": "WebPage",
-            "@id": pageUrl
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://www.loveofcalvary.org/"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Blog",
+                "item": "https://www.loveofcalvary.org/blog"
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": data.post.title,
+                "item": pageUrl
+              }
+            ]
           }
-        };
+        ];
 
         scriptEl.textContent = JSON.stringify(schemaData);
       })
