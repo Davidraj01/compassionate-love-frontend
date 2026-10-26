@@ -8,6 +8,7 @@ import {
   Share2, Tag, Loader2, Filter 
 } from 'lucide-react';
 import { PageSEOSection } from '../components/PageSEOSection';
+import { OFFICIAL_BLOG_POSTS } from '../utils/staticBlogData';
 
 const CATEGORIES = [
   'All',
@@ -47,6 +48,7 @@ export const BlogPage = () => {
       }
     } catch (err) {
       console.error('Failed to load blog posts:', err);
+      setPosts(OFFICIAL_BLOG_POSTS);
     } finally {
       setLoading(false);
     }

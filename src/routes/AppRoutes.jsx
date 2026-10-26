@@ -20,6 +20,7 @@ import { BlogPage } from '../pages/BlogPage';
 import { BlogDetailPage } from '../pages/BlogDetailPage';
 import { MediaPage } from '../pages/MediaPage';
 import { ContactPage } from '../pages/ContactPage';
+import { findStaticBlogPost } from '../utils/staticBlogData';
 
 // Admin Pages
 import { AdminLoginPage } from '../pages/AdminLoginPage';
@@ -86,13 +87,19 @@ const SEOPageSlugRoute = () => {
             if (!isMounted) return;
             if (blogData && blogData.post) {
               setRouteResult({ slug, status: 'matched', Component: BlogDetailPage });
+            } else if (findStaticBlogPost(cleanSlug)) {
+              setRouteResult({ slug, status: 'matched', Component: BlogDetailPage });
             } else {
               setRouteResult({ slug, status: 'not-found', Component: null });
             }
           })
           .catch(() => {
             if (!isMounted) return;
-            setRouteResult({ slug, status: 'not-found', Component: null });
+            if (findStaticBlogPost(cleanSlug)) {
+              setRouteResult({ slug, status: 'matched', Component: BlogDetailPage });
+            } else {
+              setRouteResult({ slug, status: 'not-found', Component: null });
+            }
           });
       }
     });

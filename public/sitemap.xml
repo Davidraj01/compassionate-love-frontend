@@ -79,45 +79,130 @@
   <!-- Ministry Blog & Articles -->
   <url>
     <loc>https://www.loveofcalvary.org/blog</loc>
-    <lastmod>2026-10-24</lastmod>
+    <lastmod>2026-10-26</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>
   </url>
 
-  <!-- Individual Active Ministry Blog Posts (Google Indexing) -->
+  <!-- Individual Active Ministry Blog Posts (Google Indexing & Rich Snippets) -->
   <url>
-    <loc>https://www.loveofcalvary.org/blog/compassionate-love-of-calvary-ministries-bible</loc>
-    <lastmod>2026-10-24</lastmod>
+    <loc>https://www.loveofcalvary.org/blog/calvary-in-chengalpattu-gospel-devotionals-for-faith-and-spiritual-growth/</loc>
+    <lastmod>2026-10-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://i.pinimg.com/736x/3a/87/52/3a875219bc9ec686dad691b83d01ab12.jpg</image:loc>
+      <image:title>Calvary in Chengalpattu - Gospel Devotionals for Faith and Spiritual Growth</image:title>
+      <image:caption>Gospel devotionals, Bible teachings, and spiritual growth in Chengalpattu</image:caption>
+    </image:image>
   </url>
 
   <url>
-    <loc>https://www.loveofcalvary.org/blog/faith-in-god-compassionate-love-calvary-ministries</loc>
-    <lastmod>2026-10-24</lastmod>
+    <loc>https://www.loveofcalvary.org/blog/daily-gospel-devotional-for-faith-best-bible-and-compassion/</loc>
+    <lastmod>2026-10-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://i.pinimg.com/736x/ed/a3/75/eda3751d7eea12253bbaf733d88233ef.jpg</image:loc>
+      <image:title>Daily Gospel Devotional for Faith, Best bible, and Compassion</image:title>
+      <image:caption>Daily gospel devotionals, Bible verses, and prayer reflections for compassion</image:caption>
+    </image:image>
   </url>
 
   <url>
-    <loc>https://www.loveofcalvary.org/blog/understanding-grace-the-heart-of-calvary</loc>
-    <lastmod>2026-10-24</lastmod>
+    <loc>https://www.loveofcalvary.org/blog/christian-gospel-outreach-for-faith-hope-and-community-service/</loc>
+    <lastmod>2026-10-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://i.pinimg.com/736x/b8/23/4b/b8234b5d487747d1a178558c13d30768.jpg</image:loc>
+      <image:title>Christian Gospel Outreach for Faith, Hope, and Community Service</image:title>
+      <image:caption>Christian gospel outreach, sermons, Scripture lessons, and community service</image:caption>
+    </image:image>
   </url>
 
   <url>
-    <loc>https://www.loveofcalvary.org/blog/the-power-of-intercessory-prayer</loc>
-    <lastmod>2026-10-24</lastmod>
+    <loc>https://www.loveofcalvary.org/blog/christian-bible-lessons-for-faith-wisdom-and-justice/</loc>
+    <lastmod>2026-10-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://i.pinimg.com/736x/6e/a7/59/6ea7591f50f94c307e31ea66b730214a.jpg</image:loc>
+      <image:title>Christian Bible Lessons for Faith, Wisdom, and Justice</image:title>
+      <image:caption>Christian Bible lessons to strengthen faith, understand Scripture, and grow in wisdom</image:caption>
+    </image:image>
   </url>
 
   <url>
-    <loc>https://www.loveofcalvary.org/blog/walking-in-unshakable-faith-in-challenging-times</loc>
-    <lastmod>2026-10-24</lastmod>
+    <loc>https://www.loveofcalvary.org/blog/compassionate-love-of-calvary-ministries-bible/</loc>
+    <lastmod>2026-10-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://i.pinimg.com/736x/1f/5d/b6/1f5db63efd47fe425b1a146f6e53bb55.jpg</image:loc>
+      <image:title>Compassionate Love of Calvary Ministries | Bible</image:title>
+      <image:caption>Bible devotion, prayer, worship, and spiritual growth in Calvary Ministries</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.loveofcalvary.org/blog/compassionate-love-of-calvary-ministries-faith-hope/</loc>
+    <lastmod>2026-10-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://i.pinimg.com/736x/88/15/d9/8815d96350a87432d001d6ff0773085c.jpg</image:loc>
+      <image:title>Compassionate Love of Calvary Ministries | Faith &amp; Hope</image:title>
+      <image:caption>Faith in God, prayer, service, and living hope transformed through Calvary</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.loveofcalvary.org/blog/christian-spiritual-growth-faith-bible/</loc>
+    <lastmod>2026-10-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</image:loc>
+      <image:title>Christian Spiritual Growth Through Faith and the Bible</image:title>
+      <image:caption>Practical wisdom from Scripture for Christian spiritual growth, prayer, and faith</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.loveofcalvary.org/blog/daily-bible-study-spiritual-growth/</loc>
+    <lastmod>2026-10-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1438232992991-995b7058bbb3?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</image:loc>
+      <image:title>Daily Bible Study and Prayer for Spiritual Growth</image:title>
+      <image:caption>Daily Bible study and prayer reflections to strengthen faith and spiritual understanding</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.loveofcalvary.org/blog/growing-in-faith-and-prayer-through-gods-word/</loc>
+    <lastmod>2026-10-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://i.pinimg.com/736x/62/72/70/6272707c82a8b6c887363deddba8fdee.jpg</image:loc>
+      <image:title>Growing in Faith and Prayer Through God's Word</image:title>
+      <image:caption>Growing in faith, biblical mandate of intercession, and power of prayer</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.loveofcalvary.org/blog/bible-teaching-for-stronger-faith-and-everyday-life/</loc>
+    <lastmod>2026-10-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1504052434569-70ad5836ab65?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</image:loc>
+      <image:title>Bible Teaching for Stronger Faith and Everyday Life</image:title>
+      <image:caption>Bible teaching to anchor your soul, build stronger faith, and find peace in Christ</image:caption>
+    </image:image>
   </url>
 
   <!-- Media, Photo Gallery & Worship Highlights -->

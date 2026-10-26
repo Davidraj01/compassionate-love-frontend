@@ -9,6 +9,8 @@ import {
   Copy, MessageCircle, Loader2, Sparkles, Heart, Eye, Tag
 } from 'lucide-react';
 
+import { findStaticBlogPost, SLUG_ALIASES } from '../utils/staticBlogData';
+
 export const BlogDetailPage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -19,139 +21,189 @@ export const BlogDetailPage = () => {
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
 
+  // Helper for applying all SEO metadata, robots directives, canonical tag & Schema.org JSON-LD
+  const applyBlogSEO = (postData, slugUsed) => {
+    if (!postData) return;
+
+    const pageTitle = postData.meta_title || `${postData.title} | Compassionate Love of Calvary Ministries`;
+    const pageDesc = postData.meta_description || postData.excerpt || 'Read inspirational Christian teachings and biblical wisdom from Compassionate Love of Calvary Ministries.';
+    
+    // Canonical URL: Ensure strict canonical format with trailing slash matching Google index
+    let pageUrl = postData.canonical_url;
+    if (!pageUrl || typeof pageUrl !== 'string') {
+      pageUrl = `https://www.loveofcalvary.org/blog/${slugUsed}/`;
+    }
+    if (!pageUrl.endsWith('/')) {
+      pageUrl += '/';
+    }
+
+    const pageImg = postData.og_image_url || getMediaUrl(postData.effective_image_url || postData.featured_image_url) || 'https://www.loveofcalvary.org/logo.png';
+
+    document.title = pageTitle;
+
+    // 1. Meta Description
+    let metaDescEl = document.querySelector('meta[name="description"]');
+    if (!metaDescEl) {
+      metaDescEl = document.createElement('meta');
+      metaDescEl.name = 'description';
+      document.head.appendChild(metaDescEl);
+    }
+    metaDescEl.content = pageDesc;
+
+    // 2. Robots Meta Tag for Googlebot & all Search Engines (Explicit Crawl & Index Directives)
+    let robotsEl = document.querySelector('meta[name="robots"]');
+    if (!robotsEl) {
+      robotsEl = document.createElement('meta');
+      robotsEl.name = 'robots';
+      document.head.appendChild(robotsEl);
+    }
+    robotsEl.content = 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+
+    let googlebotEl = document.querySelector('meta[name="googlebot"]');
+    if (!googlebotEl) {
+      googlebotEl = document.createElement('meta');
+      googlebotEl.name = 'googlebot';
+      document.head.appendChild(googlebotEl);
+    }
+    googlebotEl.content = 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+
+    // 3. Canonical Tag (Strict Self-Referencing Canonical HTTPS URL)
+    let canonicalEl = document.querySelector('link[rel="canonical"]');
+    if (!canonicalEl) {
+      canonicalEl = document.createElement('link');
+      canonicalEl.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonicalEl);
+    }
+    canonicalEl.setAttribute('href', pageUrl);
+
+    // 4. OpenGraph and Twitter Meta Tags
+    const setMetaByAttr = (attrName, attrValue, content) => {
+      let el = document.querySelector(`meta[${attrName}="${attrValue}"]`);
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute(attrName, attrValue);
+        document.head.appendChild(el);
+      }
+      el.content = content;
+    };
+
+    setMetaByAttr('property', 'og:title', postData.og_title || pageTitle);
+    setMetaByAttr('property', 'og:description', postData.og_description || pageDesc);
+    setMetaByAttr('property', 'og:url', pageUrl);
+    setMetaByAttr('property', 'og:type', 'article');
+    setMetaByAttr('property', 'og:site_name', 'Compassionate Love of Calvary Ministries');
+    if (pageImg) setMetaByAttr('property', 'og:image', pageImg);
+
+    setMetaByAttr('name', 'twitter:card', 'summary_large_image');
+    setMetaByAttr('name', 'twitter:title', postData.og_title || pageTitle);
+    setMetaByAttr('name', 'twitter:description', postData.og_description || pageDesc);
+    setMetaByAttr('name', 'twitter:url', pageUrl);
+    if (pageImg) setMetaByAttr('name', 'twitter:image', pageImg);
+
+    // 5. Schema Markup (Schema.org JSON-LD for BlogPosting & BreadcrumbList Rich Snippets)
+    let scriptEl = document.getElementById('clm-blog-structured-data');
+    if (!scriptEl) {
+      scriptEl = document.createElement('script');
+      scriptEl.id = 'clm-blog-structured-data';
+      scriptEl.type = 'application/ld+json';
+      document.head.appendChild(scriptEl);
+    }
+
+    const schemaData = [
+      {
+        "@context": "https://schema.org",
+        "@type": postData.schema_type || "BlogPosting",
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": pageUrl
+        },
+        "headline": postData.title,
+        "description": pageDesc,
+        "image": pageImg,
+        "url": pageUrl,
+        "inLanguage": "en-US",
+        "author": {
+          "@type": "Person",
+          "name": postData.author || "Pastor David Raj",
+          "url": "https://www.loveofcalvary.org/about"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Compassionate Love of Calvary Ministries",
+          "url": "https://www.loveofcalvary.org",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.loveofcalvary.org/logo.png",
+            "width": 500,
+            "height": 500
+          }
+        },
+        "datePublished": postData.published_at || postData.created_at || '2026-10-26T12:00:00+05:30',
+        "dateModified": postData.updated_at || postData.published_at || postData.created_at || '2026-10-26T12:00:00+05:30'
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.loveofcalvary.org/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Blog",
+            "item": "https://www.loveofcalvary.org/blog"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": postData.title,
+            "item": pageUrl
+          }
+        ]
+      }
+    ];
+
+    scriptEl.textContent = JSON.stringify(schemaData);
+  };
+
   useEffect(() => {
     window.scrollTo(0, 0);
     setLoading(true);
     setError(null);
 
-    const cleanSlug = (slug || '').trim().replace(/^\/+|\/+$/g, '');
+    const rawSlug = (slug || '').trim().replace(/^\/+|\/+$/g, '');
+    const cleanSlug = SLUG_ALIASES[rawSlug] || rawSlug;
+
+    // Check if redirect is needed for legacy aliases
+    if (SLUG_ALIASES[rawSlug]) {
+      navigate(`/blog/${cleanSlug}/`, { replace: true });
+      return;
+    }
 
     api.getBlogPostBySlug(cleanSlug)
       .then(data => {
-        setPost(data.post);
-        setRelatedPosts(data.related_posts || []);
-        
-        // ============================================================
-        // DYNAMIC CLIENT-SIDE SEO & STRUCTURED DATA INJECTION
-        // ============================================================
-        const pageTitle = data.post.meta_title || `${data.post.title} | Compassionate Love of Calvary Ministries`;
-        const pageDesc = data.post.meta_description || data.post.excerpt || 'Read inspirational Christian teachings and biblical wisdom from Compassionate Love of Calvary Ministries.';
-        const pageUrl = data.post.canonical_url || window.location.href;
-        const pageImg = data.post.og_image_url || getMediaUrl(data.post.effective_image_url || data.post.featured_image_url);
-
-        document.title = pageTitle;
-
-        // Meta Description
-        let metaDescEl = document.querySelector('meta[name="description"]');
-        if (!metaDescEl) {
-          metaDescEl = document.createElement('meta');
-          metaDescEl.name = 'description';
-          document.head.appendChild(metaDescEl);
+        if (data && data.post) {
+          setPost(data.post);
+          setRelatedPosts(data.related_posts || []);
+          applyBlogSEO(data.post, cleanSlug);
+        } else {
+          throw new Error('Post not found in response');
         }
-        metaDescEl.content = pageDesc;
-
-        // Robots Meta Tag for Googlebot Indexing
-        let robotsEl = document.querySelector('meta[name="robots"]');
-        if (!robotsEl) {
-          robotsEl = document.createElement('meta');
-          robotsEl.name = 'robots';
-          document.head.appendChild(robotsEl);
-        }
-        robotsEl.content = 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
-
-        // Canonical URL Tag
-        let canonicalEl = document.querySelector('link[rel="canonical"]');
-        if (!canonicalEl) {
-          canonicalEl = document.createElement('link');
-          canonicalEl.setAttribute('rel', 'canonical');
-          document.head.appendChild(canonicalEl);
-        }
-        canonicalEl.setAttribute('href', pageUrl);
-
-        // OpenGraph Meta Tags
-        const setMetaTag = (property, content) => {
-          let el = document.querySelector(`meta[property="${property}"]`);
-          if (!el) {
-            el = document.createElement('meta');
-            el.setAttribute('property', property);
-            document.head.appendChild(el);
-          }
-          el.content = content;
-        };
-
-        setMetaTag('og:title', data.post.og_title || pageTitle);
-        setMetaTag('og:description', data.post.og_description || pageDesc);
-        setMetaTag('og:url', pageUrl);
-        setMetaTag('og:type', 'article');
-        if (pageImg) setMetaTag('og:image', pageImg);
-
-        // JSON-LD Structured Data for Google Search Indexing & Rich Results
-        let scriptEl = document.getElementById('clm-blog-structured-data');
-        if (!scriptEl) {
-          scriptEl = document.createElement('script');
-          scriptEl.id = 'clm-blog-structured-data';
-          scriptEl.type = 'application/ld+json';
-          document.head.appendChild(scriptEl);
-        }
-
-        const schemaData = [
-          {
-            "@context": "https://schema.org",
-            "@type": data.post.schema_type || "BlogPosting",
-            "headline": data.post.title,
-            "description": pageDesc,
-            "image": pageImg || "https://www.loveofcalvary.org/logo.png",
-            "author": {
-              "@type": "Person",
-              "name": data.post.author || "Pastor David Raj"
-            },
-            "publisher": {
-              "@type": "Organization",
-              "name": "Compassionate Love of Calvary Ministries",
-              "logo": {
-                "@type": "ImageObject",
-                "url": "https://www.loveofcalvary.org/logo.png",
-                "width": 500,
-                "height": 500
-              }
-            },
-            "datePublished": data.post.published_at || data.post.created_at,
-            "dateModified": data.post.updated_at || data.post.created_at,
-            "mainEntityOfPage": {
-              "@type": "WebPage",
-              "@id": pageUrl
-            }
-          },
-          {
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-              {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "Home",
-                "item": "https://www.loveofcalvary.org/"
-              },
-              {
-                "@type": "ListItem",
-                "position": 2,
-                "name": "Blog",
-                "item": "https://www.loveofcalvary.org/blog"
-              },
-              {
-                "@type": "ListItem",
-                "position": 3,
-                "name": data.post.title,
-                "item": pageUrl
-              }
-            ]
-          }
-        ];
-
-        scriptEl.textContent = JSON.stringify(schemaData);
       })
       .catch(err => {
-        setError(err.message || 'Could not load article');
+        // Fallback to static blog registry to ensure zero-downtime crawlability & SEO indexing
+        const fallback = findStaticBlogPost(cleanSlug);
+        if (fallback) {
+          setPost(fallback);
+          applyBlogSEO(fallback, cleanSlug);
+          setError(null);
+        } else {
+          setError(err.message || 'Could not load article');
+        }
       })
       .finally(() => {
         setLoading(false);
@@ -162,7 +214,7 @@ export const BlogDetailPage = () => {
       const scriptEl = document.getElementById('clm-blog-structured-data');
       if (scriptEl) scriptEl.remove();
     };
-  }, [slug]);
+  }, [slug, navigate]);
 
   const handleCopyLink = () => {
     if (navigator.clipboard) {
