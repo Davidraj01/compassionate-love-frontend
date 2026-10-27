@@ -454,12 +454,27 @@
       ]
     }
     </script>
+    <!-- Visually-Hidden CSS for SEO Crawlability Block (Prevents FOUC/flicker while keeping tags & URLs 100% active in DOM & view-source) -->
+    <style>
+      .seo-crawler-block {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        padding: 0 !important;
+        margin: -1px !important;
+        overflow: hidden !important;
+        clip: rect(0, 0, 0, 0) !important;
+        clip-path: inset(50%) !important;
+        white-space: nowrap !important;
+        border: 0 !important;
+      }
+    </style>
   </head>
   <body>
 
-    <!-- Semantic Key Features & Search Crawlability Structure (Pre-rendered for Search Bots & SEO Crawlers) -->
-    <noscript>
-      <section id="key-features" class="seo-crawler-block" style="padding: 20px; font-family: sans-serif; background: #f8fafc; color: #0f172a;">
+    <!-- Semantic Key Features & Search Crawlability Structure (Pre-rendered Active HTML for Search Bots & SEO Crawlers) -->
+    <div id="root">
+      <section id="key-features" class="seo-crawler-block" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); clip-path: inset(50%); white-space: nowrap; border: 0;">
         <h1>Compassionate Love of Calvary Ministries | Faith &amp; Hope</h1>
         <p>A Christ-centered Christian ministry and church in Chengalpattu, Tamil Nadu, dedicated to sharing God's love, strengthening faith, and bringing living hope to individuals and families through the message of Jesus Christ.</p>
         
@@ -472,7 +487,7 @@
         </ul>
 
         <h2>Quick Ministry Navigation &amp; Internal Links</h2>
-        <nav aria-label="Key Features Navigation">
+        <nav aria-label="loveofcalvary.org">
           <p>
             <a href="https://www.loveofcalvary.org/">Compassionate Love of Calvary Ministries</a> &bull; 
             <a href="https://www.loveofcalvary.org/about">About Our Ministry</a> &bull; 
@@ -505,9 +520,7 @@
         <h2>Service Timings &amp; Church Location</h2>
         <p>Sunday Morning Worship: 9:00 AM &bull; Sunday Evening Fellowship: 6:00 PM<br />Address: Chengalpattu, Tamil Nadu 603001, India &bull; Phone: +91-9876543210</p>
       </section>
-    </noscript>
-    
-    <div id="root"></div>
+    </div>
     <!-- Razorpay Checkout Gateway SDK -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
