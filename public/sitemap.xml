@@ -79,12 +79,72 @@
   <!-- Ministry Blog & Articles -->
   <url>
     <loc>https://www.loveofcalvary.org/blog</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-29</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>
   </url>
 
   <!-- Individual Active Ministry Blog Posts (Google Indexing & Rich Snippets) -->
+  <url>
+    <loc>https://www.loveofcalvary.org/blog/love-of-calvary-bible-verses/</loc>
+    <lastmod>2026-10-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://i.pinimg.com/736x/8c/9e/2b/8c9e2bcd3b0e48a49836f30d60b4b52f.jpg</image:loc>
+      <image:title>Love of Calvary Bible Verses: Scriptures on God's Compassionate Love</image:title>
+      <image:caption>Scriptures and Bible verses on God's compassionate love and faith</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.loveofcalvary.org/blog/christian-sermons-in-chengalpattu/</loc>
+    <lastmod>2026-10-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1438232992991-995b7058bbb3?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</image:loc>
+      <image:title>Christian Sermons in Chengalpattu – Biblical Teachings &amp; Spiritual Growth</image:title>
+      <image:caption>Christian sermons, Bible teachings, and spiritual growth in Chengalpattu</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.loveofcalvary.org/blog/church-in-chengalpattu/</loc>
+    <lastmod>2026-10-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1504052434569-70ad5836ab65?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</image:loc>
+      <image:title>Church in Chengalpattu – Compassionate Love of Calvary Ministries</image:title>
+      <image:caption>Christian church in Chengalpattu with Sunday worship and prayer fellowship</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.loveofcalvary.org/blog/chengalpattu-church-ministry-updates/</loc>
+    <lastmod>2026-10-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://i.pinimg.com/736x/b8/23/4b/b8234b5d487747d1a178558c13d30768.jpg</image:loc>
+      <image:title>Chengalpattu Church Ministry Updates &amp; Community Outreach News</image:title>
+      <image:caption>Ministry updates, prayer meetings, and community outreach news in Chengalpattu</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.loveofcalvary.org/blog/love-of-calvary-in-chengalpattu/</loc>
+    <lastmod>2026-10-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://i.pinimg.com/736x/3a/87/52/3a875219bc9ec686dad691b83d01ab12.jpg</image:loc>
+      <image:title>Love of Calvary in Chengalpattu – Transforming Lives Through Christ</image:title>
+      <image:caption>Compassionate Love of Calvary Ministries mission and spiritual renewal in Chengalpattu</image:caption>
+    </image:image>
+  </url>
+
   <url>
     <loc>https://www.loveofcalvary.org/blog/calvary-in-chengalpattu-gospel-devotionals-for-faith-and-spiritual-growth/</loc>
     <lastmod>2026-10-26</lastmod>

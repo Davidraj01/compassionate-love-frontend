@@ -16,6 +16,11 @@ Allow: /sermons
 Allow: /events
 Allow: /blog
 Allow: /blog/*
+Allow: /blog/love-of-calvary-bible-verses/
+Allow: /blog/christian-sermons-in-chengalpattu/
+Allow: /blog/church-in-chengalpattu/
+Allow: /blog/chengalpattu-church-ministry-updates/
+Allow: /blog/love-of-calvary-in-chengalpattu/
 Allow: /media
 Allow: /contact
 Allow: /sitemap.xml
