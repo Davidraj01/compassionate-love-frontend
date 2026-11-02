@@ -1,0 +1,197 @@
+{
+  "site": "https://www.loveofcalvary.org",
+  "generated_at": "2026-11-02",
+  "description": "Registry of all active slugs, canonical URLs, and routes for Compassionate Love of Calvary Ministries",
+  "pages": [
+    { "slug": "", "route": "/", "canonical": "https://www.loveofcalvary.org/", "title": "Home", "priority": 1.0 },
+    { "slug": "about", "route": "/about", "canonical": "https://www.loveofcalvary.org/about", "title": "About Us", "priority": 0.85 },
+    { "slug": "ministries", "route": "/ministries", "canonical": "https://www.loveofcalvary.org/ministries", "title": "Ministries & Outreach", "priority": 0.9 },
+    { "slug": "bible", "route": "/bible", "canonical": "https://www.loveofcalvary.org/bible", "title": "Holy Bible", "priority": 0.8 },
+    { "slug": "study", "route": "/study", "canonical": "https://www.loveofcalvary.org/study", "title": "Bible Study", "priority": 0.85 },
+    { "slug": "devotional", "route": "/devotional", "canonical": "https://www.loveofcalvary.org/devotional", "title": "Daily Devotionals", "priority": 0.9 },
+    { "slug": "sermons", "route": "/sermons", "canonical": "https://www.loveofcalvary.org/sermons", "title": "Sermons & Messages", "priority": 0.9 },
+    { "slug": "events", "route": "/events", "canonical": "https://www.loveofcalvary.org/events", "title": "Church Events", "priority": 0.9 },
+    { "slug": "blog", "route": "/blog", "canonical": "https://www.loveofcalvary.org/blog", "title": "Blog & Articles", "priority": 0.95 },
+    { "slug": "media", "route": "/media", "canonical": "https://www.loveofcalvary.org/media", "title": "Media Gallery", "priority": 0.8 },
+    { "slug": "contact", "route": "/contact", "canonical": "https://www.loveofcalvary.org/contact", "title": "Contact & Location", "priority": 0.8 },
+    { "slug": "sitemap.html", "route": "/sitemap.html", "canonical": "https://www.loveofcalvary.org/sitemap.html", "title": "HTML Sitemap", "priority": 0.5 },
+    { "slug": "robots.html", "route": "/robots.html", "canonical": "https://www.loveofcalvary.org/robots.html", "title": "Robots & Crawler Directives", "priority": 0.5 }
+  ],
+  "blogs": [
+    {
+      "slug": "davidraj-christian-worship-song",
+      "route": "/blog/davidraj-christian-worship-song/",
+      "canonical": "https://www.loveofcalvary.org/blog/davidraj-christian-worship-song/",
+      "title": "Davidraj Christian Worship Song – Uplifting Gospel Worship & Praise",
+      "category": "Gospel & Outreach",
+      "published_at": "2026-11-02"
+    },
+    {
+      "slug": "davidraj-prayer-growing-in-faith-through-prayer",
+      "route": "/blog/davidraj-prayer-growing-in-faith-through-prayer/",
+      "canonical": "https://www.loveofcalvary.org/blog/davidraj-prayer-growing-in-faith-through-prayer/",
+      "title": "Davidraj Prayer: Growing in Faith Through Prayer & Intercession",
+      "category": "Faith & Prayer",
+      "published_at": "2026-11-02"
+    },
+    {
+      "slug": "bible-prayer-gathering-for-spiritual-growth-and-faith",
+      "route": "/blog/bible-prayer-gathering-for-spiritual-growth-and-faith/",
+      "canonical": "https://www.loveofcalvary.org/blog/bible-prayer-gathering-for-spiritual-growth-and-faith/",
+      "title": "Bible Prayer Gathering for Spiritual Growth and Faith",
+      "category": "Faith & Prayer",
+      "published_at": "2026-11-02"
+    },
+    {
+      "slug": "bible-reading-for-today-spiritual-growth-and-faith",
+      "route": "/blog/bible-reading-for-today-spiritual-growth-and-faith/",
+      "canonical": "https://www.loveofcalvary.org/blog/bible-reading-for-today-spiritual-growth-and-faith/",
+      "title": "Bible Reading for Today: Spiritual Growth and Faith",
+      "category": "Biblical Teaching",
+      "published_at": "2026-11-02"
+    },
+    {
+      "slug": "best-bible-quotes-for-daily-faith-and-inspiration",
+      "route": "/blog/best-bible-quotes-for-daily-faith-and-inspiration/",
+      "canonical": "https://www.loveofcalvary.org/blog/best-bible-quotes-for-daily-faith-and-inspiration/",
+      "title": "Best Bible Quotes for Daily Faith and Inspiration",
+      "category": "Biblical Teaching",
+      "published_at": "2026-11-02"
+    },
+    {
+      "slug": "bible-verses-of-the-day",
+      "route": "/blog/bible-verses-of-the-day/",
+      "canonical": "https://www.loveofcalvary.org/blog/bible-verses-of-the-day/",
+      "title": "Bible Verses of the Day – Daily Scripture for Peace & Hope",
+      "category": "Biblical Teaching",
+      "published_at": "2026-11-02"
+    },
+    {
+      "slug": "love-of-calvary-bible-verses",
+      "route": "/blog/love-of-calvary-bible-verses/",
+      "canonical": "https://www.loveofcalvary.org/blog/love-of-calvary-bible-verses/",
+      "title": "Love of Calvary Bible Verses: Scriptures on God's Compassionate Love",
+      "category": "Biblical Teaching",
+      "published_at": "2026-10-29"
+    },
+    {
+      "slug": "christian-sermons-in-chengalpattu",
+      "route": "/blog/christian-sermons-in-chengalpattu/",
+      "canonical": "https://www.loveofcalvary.org/blog/christian-sermons-in-chengalpattu/",
+      "title": "Christian Sermons in Chengalpattu – Biblical Teachings & Spiritual Growth",
+      "category": "Gospel & Outreach",
+      "published_at": "2026-10-29"
+    },
+    {
+      "slug": "church-in-chengalpattu",
+      "route": "/blog/church-in-chengalpattu/",
+      "canonical": "https://www.loveofcalvary.org/blog/church-in-chengalpattu/",
+      "title": "Church in Chengalpattu – Compassionate Love of Calvary Ministries",
+      "category": "Faith & Prayer",
+      "published_at": "2026-10-29"
+    },
+    {
+      "slug": "chengalpattu-church-ministry-updates",
+      "route": "/blog/chengalpattu-church-ministry-updates/",
+      "canonical": "https://www.loveofcalvary.org/blog/chengalpattu-church-ministry-updates/",
+      "title": "Chengalpattu Church Ministry Updates & Community Outreach News",
+      "category": "Ministry Updates",
+      "published_at": "2026-10-29"
+    },
+    {
+      "slug": "love-of-calvary-in-chengalpattu",
+      "route": "/blog/love-of-calvary-in-chengalpattu/",
+      "canonical": "https://www.loveofcalvary.org/blog/love-of-calvary-in-chengalpattu/",
+      "title": "Love of Calvary in Chengalpattu – Transforming Lives Through Christ",
+      "category": "Gospel & Outreach",
+      "published_at": "2026-10-29"
+    },
+    {
+      "slug": "calvary-in-chengalpattu-gospel-devotionals-for-faith-and-spiritual-growth",
+      "route": "/blog/calvary-in-chengalpattu-gospel-devotionals-for-faith-and-spiritual-growth/",
+      "canonical": "https://www.loveofcalvary.org/blog/calvary-in-chengalpattu-gospel-devotionals-for-faith-and-spiritual-growth/",
+      "title": "Calvary in Chengalpattu – Gospel Devotionals for Faith and Spiritual Growth",
+      "category": "Gospel & Outreach",
+      "published_at": "2026-10-26"
+    },
+    {
+      "slug": "daily-gospel-devotional-for-faith-best-bible-and-compassion",
+      "route": "/blog/daily-gospel-devotional-for-faith-best-bible-and-compassion/",
+      "canonical": "https://www.loveofcalvary.org/blog/daily-gospel-devotional-for-faith-best-bible-and-compassion/",
+      "title": "Daily Gospel Devotional for Faith, Best bible, and Compassion",
+      "category": "Faith & Prayer",
+      "published_at": "2026-10-26"
+    },
+    {
+      "slug": "christian-gospel-outreach-for-faith-hope-and-community-service",
+      "route": "/blog/christian-gospel-outreach-for-faith-hope-and-community-service/",
+      "canonical": "https://www.loveofcalvary.org/blog/christian-gospel-outreach-for-faith-hope-and-community-service/",
+      "title": "Christian Gospel Outreach for Faith, Hope, and Community Service",
+      "category": "Gospel & Outreach",
+      "published_at": "2026-10-26"
+    },
+    {
+      "slug": "christian-bible-lessons-for-faith-wisdom-and-justice",
+      "route": "/blog/christian-bible-lessons-for-faith-wisdom-and-justice/",
+      "canonical": "https://www.loveofcalvary.org/blog/christian-bible-lessons-for-faith-wisdom-and-justice/",
+      "title": "Christian Bible Lessons for Faith, Wisdom, and Justice",
+      "category": "Biblical Teaching",
+      "published_at": "2026-10-26"
+    },
+    {
+      "slug": "compassionate-love-of-calvary-ministries-bible",
+      "route": "/blog/compassionate-love-of-calvary-ministries-bible/",
+      "canonical": "https://www.loveofcalvary.org/blog/compassionate-love-of-calvary-ministries-bible/",
+      "title": "Compassionate Love of Calvary Ministries | Bible",
+      "category": "Biblical Teaching",
+      "published_at": "2026-10-07"
+    },
+    {
+      "slug": "compassionate-love-of-calvary-ministries-faith-hope",
+      "route": "/blog/compassionate-love-of-calvary-ministries-faith-hope/",
+      "canonical": "https://www.loveofcalvary.org/blog/compassionate-love-of-calvary-ministries-faith-hope/",
+      "title": "Compassionate Love of Calvary Ministries | Faith & Hope",
+      "category": "Faith & Prayer",
+      "published_at": "2026-10-07"
+    },
+    {
+      "slug": "christian-spiritual-growth-faith-bible",
+      "route": "/blog/christian-spiritual-growth-faith-bible/",
+      "canonical": "https://www.loveofcalvary.org/blog/christian-spiritual-growth-faith-bible/",
+      "title": "Christian Spiritual Growth Through Faith and the Bible",
+      "category": "Spiritual Growth",
+      "published_at": "2026-09-30"
+    },
+    {
+      "slug": "daily-bible-study-spiritual-growth",
+      "route": "/blog/daily-bible-study-spiritual-growth/",
+      "canonical": "https://www.loveofcalvary.org/blog/daily-bible-study-spiritual-growth/",
+      "title": "Daily Bible Study and Prayer for Spiritual Growth",
+      "category": "Spiritual Growth",
+      "published_at": "2026-09-30"
+    },
+    {
+      "slug": "growing-in-faith-and-prayer-through-gods-word",
+      "route": "/blog/growing-in-faith-and-prayer-through-gods-word/",
+      "canonical": "https://www.loveofcalvary.org/blog/growing-in-faith-and-prayer-through-gods-word/",
+      "title": "Growing in Faith and Prayer Through God's Word",
+      "category": "Faith & Prayer",
+      "published_at": "2026-09-30"
+    },
+    {
+      "slug": "bible-teaching-for-stronger-faith-and-everyday-life",
+      "route": "/blog/bible-teaching-for-stronger-faith-and-everyday-life/",
+      "canonical": "https://www.loveofcalvary.org/blog/bible-teaching-for-stronger-faith-and-everyday-life/",
+      "title": "Bible Teaching for Stronger Faith and Everyday Life",
+      "category": "Biblical Teaching",
+      "published_at": "2026-09-30"
+    }
+  ],
+  "aliases": {
+    "faith-in-god-compassionate-love-calvary-ministries": "compassionate-love-of-calvary-ministries-faith-hope",
+    "understanding-grace-the-heart-of-calvary": "daily-bible-study-spiritual-growth",
+    "the-power-of-intercessory-prayer": "growing-in-faith-and-prayer-through-gods-word",
+    "walking-in-unshakable-faith-in-challenging-times": "bible-teaching-for-stronger-faith-and-everyday-life"
+  }
+}
+

@@ -21,6 +21,12 @@ Allow: /blog/christian-sermons-in-chengalpattu/
 Allow: /blog/church-in-chengalpattu/
 Allow: /blog/chengalpattu-church-ministry-updates/
 Allow: /blog/love-of-calvary-in-chengalpattu/
+Allow: /blog/davidraj-christian-worship-song/
+Allow: /blog/davidraj-prayer-growing-in-faith-through-prayer/
+Allow: /blog/bible-prayer-gathering-for-spiritual-growth-and-faith/
+Allow: /blog/bible-reading-for-today-spiritual-growth-and-faith/
+Allow: /blog/best-bible-quotes-for-daily-faith-and-inspiration/
+Allow: /blog/bible-verses-of-the-day/
 Allow: /media
 Allow: /contact
 Allow: /sitemap.xml

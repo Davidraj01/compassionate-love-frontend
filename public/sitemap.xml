@@ -79,12 +79,84 @@
   <!-- Ministry Blog & Articles -->
   <url>
     <loc>https://www.loveofcalvary.org/blog</loc>
-    <lastmod>2026-10-29</lastmod>
+    <lastmod>2026-11-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>
   </url>
 
   <!-- Individual Active Ministry Blog Posts (Google Indexing & Rich Snippets) -->
+  <url>
+    <loc>https://www.loveofcalvary.org/blog/davidraj-christian-worship-song/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</image:loc>
+      <image:title>Davidraj Christian Worship Song – Uplifting Gospel Worship &amp; Praise</image:title>
+      <image:caption>Davidraj Christian worship songs and praise music at Compassionate Love of Calvary</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.loveofcalvary.org/blog/davidraj-prayer-growing-in-faith-through-prayer/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://i.pinimg.com/736x/62/72/70/6272707c82a8b6c887363deddba8fdee.jpg</image:loc>
+      <image:title>Davidraj Prayer: Growing in Faith Through Prayer &amp; Intercession</image:title>
+      <image:caption>Teachings on growing in faith through prayer and biblical intercession</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.loveofcalvary.org/blog/bible-prayer-gathering-for-spiritual-growth-and-faith/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1438232992991-995b7058bbb3?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</image:loc>
+      <image:title>Bible Prayer Gathering for Spiritual Growth and Faith</image:title>
+      <image:caption>Bible prayer gatherings in Chengalpattu for spiritual growth and fellowship</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.loveofcalvary.org/blog/bible-reading-for-today-spiritual-growth-and-faith/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://i.pinimg.com/736x/8c/9e/2b/8c9e2bcd3b0e48a49836f30d60b4b52f.jpg</image:loc>
+      <image:title>Bible Reading for Today: Spiritual Growth and Faith</image:title>
+      <image:caption>Daily Bible reading and Scripture reflections for faith and spiritual growth</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.loveofcalvary.org/blog/best-bible-quotes-for-daily-faith-and-inspiration/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1504052434569-70ad5836ab65?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</image:loc>
+      <image:title>Best Bible Quotes for Daily Faith and Inspiration</image:title>
+      <image:caption>Best Bible quotes and encouraging verses for daily Christian inspiration</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.loveofcalvary.org/blog/bible-verses-of-the-day/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://i.pinimg.com/736x/1f/5d/b6/1f5db63efd47fe425b1a146f6e53bb55.jpg</image:loc>
+      <image:title>Bible Verses of the Day – Daily Scripture for Peace &amp; Hope</image:title>
+      <image:caption>Inspiring Bible verses of the day for spiritual strength and peace</image:caption>
+    </image:image>
+  </url>
+
   <url>
     <loc>https://www.loveofcalvary.org/blog/love-of-calvary-bible-verses/</loc>
     <lastmod>2026-10-29</lastmod>
