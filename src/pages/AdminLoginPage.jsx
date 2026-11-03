@@ -24,7 +24,12 @@ export const AdminLoginPage = () => {
       await login(username, password);
       navigate(ROUTES.ADMIN_DASHBOARD);
     } catch (err) {
-      setErrorMsg(err.error || 'Invalid credentials. Please check your username and password.');
+      setErrorMsg(
+        err?.error ||
+        err?.detail ||
+        err?.message ||
+        'Unable to sign in. Please verify your connection and credentials.'
+      );
     } finally {
       setLoading(false);
     }

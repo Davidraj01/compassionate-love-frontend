@@ -216,12 +216,49 @@ export const api = {
 
   // Authentication Endpoints
   async login(username, password) {
-    const res = await fetch(`${API_BASE_URL}/auth/login/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    });
-    const result = await res.json();
+    let res;
+    try {
+      res = await fetch(`${API_BASE_URL}/auth/login/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+    } catch (networkErr) {
+      // Handles network failure, CORS blocks, or DNS/server-offline issues
+      throw {
+        error: `Cannot connect to live API server (${API_BASE_URL}). The server is currently unreachable or rejecting requests (Network/CORS error). Please ensure the backend is running.`,
+        isNetworkError: true,
+      };
+    }
+
+    let result;
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      try {
+        result = await res.json();
+      } catch (jsonErr) {
+        result = { error: 'Invalid JSON response from server' };
+      }
+    } else {
+      // Server returned HTML instead of JSON (e.g. Apache 503 or 500 error page)
+      if (res.status === 503) {
+        throw {
+          error: `Live backend server (${API_BASE_URL}) is currently unavailable (HTTP 503). The Python/WSGI application is stopped or restarting on the host.`,
+          isServerError: true,
+        };
+      }
+      if (res.status === 500) {
+        throw {
+          error: `Live server encountered an internal error (HTTP 500). Please check backend error logs.`,
+          isServerError: true,
+        };
+      }
+      throw {
+        error: `Server returned HTTP ${res.status}. Please check backend configuration.`,
+        isServerError: true,
+      };
+    }
+
     if (!res.ok) throw result;
     return result;
   },
