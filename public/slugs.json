@@ -19,6 +19,46 @@
   ],
   "blogs": [
     {
+      "slug": "davidraj-message-connect-through-faith-and-prayer",
+      "route": "/blog/davidraj-message-connect-through-faith-and-prayer/",
+      "canonical": "https://www.loveofcalvary.org/blog/davidraj-message-connect-through-faith-and-prayer/",
+      "title": "Davidraj Message: Connect Through Faith and Prayer",
+      "category": "Faith & Prayer",
+      "published_at": "2026-11-05"
+    },
+    {
+      "slug": "forest-officer-davidraj-christian-message",
+      "route": "/blog/forest-officer-davidraj-christian-message/",
+      "canonical": "https://www.loveofcalvary.org/blog/forest-officer-davidraj-christian-message/",
+      "title": "Forest Officer Davidraj Christian Message – Faith, Creation & Ministry",
+      "category": "Gospel & Outreach",
+      "published_at": "2026-11-05"
+    },
+    {
+      "slug": "daily-word-of-god-bible-messages",
+      "route": "/blog/daily-word-of-god-bible-messages/",
+      "canonical": "https://www.loveofcalvary.org/blog/daily-word-of-god-bible-messages/",
+      "title": "Daily Word of God: Bible Messages for Spiritual Encouragement",
+      "category": "Biblical Teaching",
+      "published_at": "2026-11-05"
+    },
+    {
+      "slug": "power-of-the-blood-of-jesus-in-christian-faith",
+      "route": "/blog/power-of-the-blood-of-jesus-in-christian-faith/",
+      "canonical": "https://www.loveofcalvary.org/blog/power-of-the-blood-of-jesus-in-christian-faith/",
+      "title": "Power of the Blood of Jesus in Christian Faith & Redemption",
+      "category": "Biblical Teaching",
+      "published_at": "2026-11-05"
+    },
+    {
+      "slug": "peace-to-the-god-for-the-world-through-faith",
+      "route": "/blog/peace-to-the-god-for-the-world-through-faith/",
+      "canonical": "https://www.loveofcalvary.org/blog/peace-to-the-god-for-the-world-through-faith/",
+      "title": "Peace with God for the World Through Faith in Jesus Christ",
+      "category": "Faith & Prayer",
+      "published_at": "2026-11-05"
+    },
+    {
       "slug": "davidraj-christian-worship-song",
       "route": "/blog/davidraj-christian-worship-song/",
       "canonical": "https://www.loveofcalvary.org/blog/davidraj-christian-worship-song/",

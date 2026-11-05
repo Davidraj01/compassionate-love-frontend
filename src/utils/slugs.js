@@ -36,6 +36,11 @@ export const PAGE_SLUGS = {
  * Official Ministry Blog Slugs
  */
 export const BLOG_SLUGS = {
+  DAVIDRAJ_MESSAGE_CONNECT: 'davidraj-message-connect-through-faith-and-prayer',
+  FOREST_OFFICER_DAVIDRAJ: 'forest-officer-davidraj-christian-message',
+  DAILY_WORD_OF_GOD: 'daily-word-of-god-bible-messages',
+  POWER_OF_THE_BLOOD_OF_JESUS: 'power-of-the-blood-of-jesus-in-christian-faith',
+  PEACE_WITH_GOD: 'peace-to-the-god-for-the-world-through-faith',
   DAVIDRAJ_CHRISTIAN_WORSHIP_SONG: 'davidraj-christian-worship-song',
   DAVIDRAJ_PRAYER: 'davidraj-prayer-growing-in-faith-through-prayer',
   BIBLE_PRAYER_GATHERING: 'bible-prayer-gathering-for-spiritual-growth-and-faith',

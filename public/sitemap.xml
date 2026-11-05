@@ -79,12 +79,72 @@
   <!-- Ministry Blog & Articles -->
   <url>
     <loc>https://www.loveofcalvary.org/blog</loc>
-    <lastmod>2026-11-02</lastmod>
+    <lastmod>2026-11-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>
   </url>
 
   <!-- Individual Active Ministry Blog Posts (Google Indexing & Rich Snippets) -->
+  <url>
+    <loc>https://www.loveofcalvary.org/blog/davidraj-message-connect-through-faith-and-prayer/</loc>
+    <lastmod>2026-11-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1438232992991-995b7058bbb3?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</image:loc>
+      <image:title>Davidraj Message: Connect Through Faith and Prayer</image:title>
+      <image:caption>Pastor David Raj message on connecting through prayer, faith, and spiritual renewal</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.loveofcalvary.org/blog/forest-officer-davidraj-christian-message/</loc>
+    <lastmod>2026-11-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</image:loc>
+      <image:title>Forest Officer Davidraj Christian Message – Faith, Creation &amp; Ministry</image:title>
+      <image:caption>Christian message from Forest Officer Pastor David Raj about God's creation and faith</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.loveofcalvary.org/blog/daily-word-of-god-bible-messages/</loc>
+    <lastmod>2026-11-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://i.pinimg.com/736x/8c/9e/2b/8c9e2bcd3b0e48a49836f30d60b4b52f.jpg</image:loc>
+      <image:title>Daily Word of God: Bible Messages for Spiritual Encouragement</image:title>
+      <image:caption>Daily Word of God Bible messages, reflections, and spiritual encouragement</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.loveofcalvary.org/blog/power-of-the-blood-of-jesus-in-christian-faith/</loc>
+    <lastmod>2026-11-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://i.pinimg.com/736x/3a/87/52/3a875219bc9ec686dad691b83d01ab12.jpg</image:loc>
+      <image:title>Power of the Blood of Jesus in Christian Faith &amp; Redemption</image:title>
+      <image:caption>Biblical teachings on the power of the blood of Jesus, redemption, and victory</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.loveofcalvary.org/blog/peace-to-the-god-for-the-world-through-faith/</loc>
+    <lastmod>2026-11-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1504052434569-70ad5836ab65?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</image:loc>
+      <image:title>Peace with God for the World Through Faith in Jesus Christ</image:title>
+      <image:caption>Experiencing peace with God for the world through faith in Jesus Christ</image:caption>
+    </image:image>
+  </url>
+
   <url>
     <loc>https://www.loveofcalvary.org/blog/davidraj-christian-worship-song/</loc>
     <lastmod>2026-11-02</lastmod>
